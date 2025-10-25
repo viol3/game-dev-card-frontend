@@ -3,18 +3,24 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
+import { useCurrentAccount, useSignAndExecuteTransaction } from '@mysten/dapp-kit';
+import { Transaction } from '@mysten/sui/transactions';
 import { saveProfile, generateUsername } from '../services/profileService';
 import { useWallet } from '../contexts/WalletContext';
 import { User, ArrowRight, Sparkles } from 'lucide-react';
 import { toast } from '../hooks/use-toast';
+import { PACKAGE } from '../constants';
 
-const CreateProfilePage = () => {
+const CreateProfilePage = () => 
+{
   const [characterName, setCharacterName] = useState('');
-  const [bio, setBio] = useState('');
+  const [isCreating, setIsCreating] = useState(false);
   const navigate = useNavigate();
   const { address } = useWallet();
+  const account = useCurrentAccount();
+  const { mutate: signAndExecute } = useSignAndExecuteTransaction();
 
-  const handleSubmit = (e) => 
+  const handleSubmit = async (e) => 
     {
     e.preventDefault();
     
@@ -40,21 +46,68 @@ const CreateProfilePage = () => {
       return;
     }
 
-    const profile = 
-    {
-      name: characterName,
-      username: generateUsername(characterName),
-      bio: bio || `Game developer and pixel art enthusiast`,
-      walletAddress: address,
-      createdAt: new Date().toISOString(),
-    };
+    setIsCreating(true);
 
-    saveProfile(profile, address);
-    toast({
-      title: 'Character created!',
-      description: `Welcome, ${characterName}! Your quest begins now.`,
-    });
-    navigate('/dashboard');
+    try {
+      // Transaction oluştur
+      const tx = new Transaction();
+      
+      tx.moveCall({
+        target: `${PACKAGE.PACKAGEID}::${PACKAGE.MODULENAME}::${PACKAGE.CREATEPROFILEFUNC}`,
+        arguments: [
+          tx.pure.string(characterName), // name: String
+        ],
+      });
+
+      // Transaction'ı imzala ve gönder
+      signAndExecute(
+        {
+          transaction: tx,
+        },
+        {
+          onSuccess: (result) => 
+          {
+            console.log('Profile created successfully:', result);
+            
+            toast({
+              title: 'Character Created! 🎮',
+              description: `Welcome, ${characterName}! Your quest begins now.`,
+            });
+
+            // Dashboard'a yönlendir
+            setTimeout(() => 
+            {
+              navigate('/dashboard');
+            }, 1500);
+          },
+          onError: (error) => 
+          {
+            console.error('Error creating profile:', error);
+            
+            toast(
+            {
+              title: 'Creation Failed!',
+              description: error.message || 'Failed to create character. Please try again.',
+              variant: 'destructive',
+            });
+            
+            setIsCreating(false);
+          },
+        }
+      );
+    } catch (error) 
+    {
+      console.error('Transaction error:', error);
+      
+      toast(
+      {
+        title: 'Transaction Error!',
+        description: 'An error occurred. Please try again.',
+        variant: 'destructive',
+      });
+      
+      setIsCreating(false);
+    }
   };
 
   return (
@@ -115,7 +168,7 @@ const CreateProfilePage = () => {
               </p>
             </div>
 
-            <div className="space-y-3">
+            {/* <div className="space-y-3">
               <Label htmlFor="bio" className="text-lg font-mono text-yellow-300 flex items-center gap-2">
                 <User className="w-5 h-5" />
                 BIO (Optional)
@@ -132,7 +185,7 @@ const CreateProfilePage = () => {
               <p className="text-sm text-slate-400 font-mono">
                 {bio.length}/100 characters
               </p>
-            </div>
+            </div> */}
 
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 pt-4">

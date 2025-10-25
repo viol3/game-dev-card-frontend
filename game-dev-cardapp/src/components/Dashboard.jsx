@@ -37,7 +37,7 @@ const Dashboard = () => {
         return;
       }
       setProfile(savedProfile);
-      setGames(getGames(address));
+      setGames(await getGames(address));
     }
     checkSavedProfile();
   }, [navigate, address]);
@@ -47,15 +47,15 @@ const Dashboard = () => {
     setSelectedGame(null);
   };
 
-  const handleSaveGame = (gameData) => 
+  const handleSaveGame = async (gameData) => 
   {
     if (!address) return;
     
     if (selectedGame) 
     {
       // Update existing game
-      const updated = updateGame(selectedGame.id, gameData, address);
-      setGames(getGames(address));
+      const updated = await updateGame(selectedGame.id, gameData, address);
+      setGames(await getGames(address));
       setSelectedGame(updated);
       toast({
         title: 'Game Updated!',
@@ -65,8 +65,8 @@ const Dashboard = () => {
     else 
     {
       // Add new game
-      const newGame = addGame(gameData, address);
-      setGames(getGames(address));
+      const newGame = await addGame(gameData, address);
+      setGames(await getGames(address));
       setSelectedGame(newGame);
       toast(
       {
@@ -77,12 +77,12 @@ const Dashboard = () => {
     setIsAddingNew(false);
   };
 
-  const handleDeleteGame = (id) => 
+  const handleDeleteGame = async (id) => 
   {
     if (!address) return;
     
-    deleteGame(id, address);
-    setGames(getGames(address));
+    await deleteGame(id, address);
+    setGames(await getGames(address));
     if (selectedGame?.id === id) 
     {
       setSelectedGame(null);

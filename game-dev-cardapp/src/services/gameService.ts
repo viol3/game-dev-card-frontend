@@ -1,20 +1,61 @@
 import type { Game } from '../types';
-import { STORAGE_KEYS } from '../constants';
+import { SuiClient, getFullnodeUrl } from '@mysten/sui/client';
+import { STORAGE_KEYS, PACKAGE } from '../constants';
 
 /**
  * Get all games from localStorage by wallet address
  */
-export const getGames = (walletAddress?: string): Game[] => {
+export const getGames = async (walletAddress?: string): Promise<Game[]> => 
+{
   try {
-    if (walletAddress) {
-      const stored = localStorage.getItem(`${STORAGE_KEYS.GAMES}_${walletAddress}`);
-      return stored ? JSON.parse(stored) : [];
+    if (!walletAddress) 
+    {
+      return [];
     }
-    // Fallback to old storage for backward compatibility
-    const stored = localStorage.getItem(STORAGE_KEYS.GAMES);
-    return stored ? JSON.parse(stored) : [];
-  } catch (error) {
-    console.error('Error reading games from localStorage:', error);
+
+
+    const client = new SuiClient({ url: getFullnodeUrl('testnet') });
+    
+    const ownedObjects = await client.getOwnedObjects(
+    {
+      owner: walletAddress,
+      filter: 
+      {
+        StructType: PACKAGE.GAMETYPE
+      },
+      options: 
+      {
+        showType: true,
+        showContent: true,
+      },
+    });
+
+    if (ownedObjects.data.length === 0) 
+    {
+      return [];
+    }
+
+    const games: Game[] = ownedObjects.data.map((obj) => {
+      if (obj.data?.content && 'fields' in obj.data.content) {
+        const fields = obj.data.content.fields as any;
+        return {
+          id: obj.data.objectId,
+          name: fields.game_name || '',
+          link: fields.game_link || '',
+          description: fields.description || '',
+          image: fields.image_url || '',
+          platform: fields.platform || '',
+        };
+      }
+      
+      return null;
+    }).filter((game): game is Game => game !== null);
+
+    return games;
+  } 
+  catch (error) 
+  {
+    console.error('Error reading games:', error);
     return [];
   }
 };
@@ -37,8 +78,8 @@ export const saveGames = (games: Game[], walletAddress: string): void => {
 /**
  * Add a new game
  */
-export const addGame = (game: Omit<Game, 'id'>, walletAddress: string): Game => {
-  const games = getGames(walletAddress);
+export const addGame = async (game: Omit<Game, 'id'>, walletAddress: string): Promise<Game> => {
+  const games = await getGames(walletAddress);
   const newGame: Game = {
     ...game,
     id: Date.now().toString(),
@@ -51,8 +92,8 @@ export const addGame = (game: Omit<Game, 'id'>, walletAddress: string): Game => 
 /**
  * Update an existing game
  */
-export const updateGame = (id: string, updatedGame: Partial<Game>, walletAddress: string): Game | null => {
-  const games = getGames(walletAddress);
+export const updateGame = async (id: string, updatedGame: Partial<Game>, walletAddress: string): Promise<Game | null> => {
+  const games = await getGames(walletAddress);
   const index = games.findIndex((g) => g.id === id);
   
   if (index === -1) {
@@ -68,8 +109,9 @@ export const updateGame = (id: string, updatedGame: Partial<Game>, walletAddress
 /**
  * Delete a game by id
  */
-export const deleteGame = (id: string, walletAddress: string): void => {
-  const games = getGames(walletAddress);
+export const deleteGame = async (id: string, walletAddress: string): Promise<void> => 
+{
+  const games = await getGames(walletAddress);
   const filtered = games.filter((g) => g.id !== id);
   saveGames(filtered, walletAddress);
 };

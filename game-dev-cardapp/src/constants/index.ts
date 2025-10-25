@@ -8,6 +8,10 @@ export const PACKAGE =
 {
   PACKAGEID: '0xfa452d6ae9520d9ad83c1172ce5c6a1170df245df66cc10f6fc035c913bbdeb3',
   PROFILETYPE: '0xfa452d6ae9520d9ad83c1172ce5c6a1170df245df66cc10f6fc035c913bbdeb3::game_dev_card::GameDevCardProfile',
+  GAMETYPE: '0xfa452d6ae9520d9ad83c1172ce5c6a1170df245df66cc10f6fc035c913bbdeb3::game_dev_card::GameItem',
+  MODULENAME: 'game_dev_card',
+  CREATEPROFILEFUNC: 'create_game_dev_profile',
+  ADDGAMEFUNC: 'add_game_to_profile',
 } as const;
 
 export const ROUTES = {

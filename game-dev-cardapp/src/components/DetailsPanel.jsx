@@ -4,6 +4,10 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Textarea } from './ui/textarea';
 import { Save, X, Image as ImageIcon, Calendar, Tag, Link as LinkIcon } from 'lucide-react';
+import { PACKAGE } from '../constants';
+import { useCurrentAccount, useSignAndExecuteTransaction, useSuiClient } from '@mysten/dapp-kit';
+import { Transaction } from '@mysten/sui/transactions';
+import { toast } from '../hooks/use-toast';
 
 const DetailsPanel = ({ game, isAddingNew, onSave, onCancel }) => {
   const [formData, setFormData] = useState({
@@ -15,30 +19,68 @@ const DetailsPanel = ({ game, isAddingNew, onSave, onCancel }) => {
     releaseDate: '',
     tags: '',
   });
-
-  useEffect(() => {
-    if (game) {
-      setFormData({
-        name: game.name || '',
-        link: game.link || '',
-        description: game.description || '',
-        image: game.image || '',
-        platform: game.platform || '',
-        releaseDate: game.releaseDate || '',
-        tags: game.tags ? game.tags.join(', ') : '',
-      });
-    } else if (isAddingNew) {
-      setFormData({
-        name: '',
-        link: '',
-        description: '',
-        image: '',
-        platform: '',
-        releaseDate: '',
-        tags: '',
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [profileObjectId, setProfileObjectId] = useState(null);
+  
+  const account = useCurrentAccount();
+  const suiClient = useSuiClient();
+  const { mutate: signAndExecute } = useSignAndExecuteTransaction();
+  useEffect(() => 
+  {
+    if(game && !isAddingNew)
+    {
+      setFormData(
+      {
+          name: game.name || '',
+          link: game.link || '',
+          description: game.description || '',
+          image: game.image  || '',
+          platform: game.platform || ''
       });
     }
-  }, [game, isAddingNew]);
+    else
+    {
+      setFormData(
+      {
+          name: '',
+          link: '',
+          description: '',
+          image: '',
+          platform:  ''
+      });
+    }
+    
+    const fetchProfileObjectId = async () => {
+      if (!account?.address) return;
+
+      try {
+        const ownedObjects = await suiClient.getOwnedObjects({
+          owner: account.address,
+          filter: {
+            StructType: PACKAGE.PROFILETYPE
+          },
+          options: {
+            showType: true,
+            showContent: true,
+          },
+        });
+
+        if (ownedObjects.data.length > 0) {
+          setProfileObjectId(ownedObjects.data[0].data.objectId);
+        } else {
+          toast({
+            title: 'Profile Not Found!',
+            description: 'Please create a profile first.',
+            variant: 'destructive',
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+      }
+    };
+
+    fetchProfileObjectId();
+  }, [account, suiClient, game, isAddingNew]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -53,24 +95,98 @@ const DetailsPanel = ({ game, isAddingNew, onSave, onCancel }) => {
       return;
     }
 
-    const gameData = {
-      ...formData,
-      tags: formData.tags
-        .split(',')
-        .map((tag) => tag.trim())
-        .filter((tag) => tag),
+    const gameData = 
+    {
+      ...formData
     };
 
-    onSave(gameData);
+    setIsSubmitting(true);
+
+    try {
+      // Transaction oluştur
+      const tx = new Transaction();
+      
+      tx.moveCall(
+      {
+        target: `${PACKAGE.PACKAGEID}::${PACKAGE.MODULENAME}::${PACKAGE.ADDGAMEFUNC}`,
+        arguments: [
+          tx.object(profileObjectId),                    // mut profile: GameDevCardProfile
+          tx.pure.string(formData.name),                 // game_name: String
+          tx.pure.string(formData.link),             // game_link: String
+          tx.pure.string(formData.description || ''),    // description: String
+          tx.pure.string(formData.image || ''),       // image_url: String
+          tx.pure.string(formData.platform || ''),       // platform: String
+        ],
+      });
+
+      // Transaction'ı imzala ve gönder
+      signAndExecute(
+        {
+          transaction: tx,
+        },
+        {
+          onSuccess: (result) => 
+          {
+            console.log('Game added successfully:', result);
+            
+            toast({
+              title: 'Game Added! 🎮',
+              description: `${formData.name} has been added to your portfolio.`,
+            });
+
+            // Form'u temizle
+            setFormData(
+            {
+              name: '',
+              gameLink: '',
+              description: '',
+              imageUrl: '',
+              platform: '',
+            });
+
+            // Parent component'e bildir (varsa)
+            if (onSave) {
+              onSave(formData);
+            }
+
+            setIsSubmitting(false);
+          },
+          onError: (error) => {
+            console.error('Error adding game:', error);
+            
+            toast({
+              title: 'Failed to Add Game!',
+              description: error.message || 'An error occurred. Please try again.',
+              variant: 'destructive',
+            });
+            
+            setIsSubmitting(false);
+          },
+        }
+      );
+    } catch (error) 
+    {
+      console.error('Transaction error:', error);
+      
+      toast(
+      {
+        title: 'Transaction Error!',
+        description: 'An error occurred. Please try again.',
+        variant: 'destructive',
+      });
+      
+      setIsSubmitting(false);
+    }
   };
 
-  if (!game && !isAddingNew) {
+  if (!game && !isAddingNew) 
+  {
     return (
       <div className="bg-slate-800/80 border-4 border-pink-500 pixel-border backdrop-blur-sm h-[calc(100vh-200px)] flex items-center justify-center">
         <div className="text-center p-12">
           <div className="text-8xl mb-6 animate-bounce">📜</div>
           <h3 className="text-3xl font-bold pixel-text text-pink-300 mb-4">CHARACTER SHEET</h3>
-          <p className="text-lg font-mono text-slate-400">Select a quest from your inventory</p>
+          <p className="text-lg font-mono text-slate-400">Select a game from your inventory</p>
           <p className="text-lg font-mono text-slate-400">or add a new one to get started!</p>
         </div>
       </div>
@@ -82,7 +198,7 @@ const DetailsPanel = ({ game, isAddingNew, onSave, onCancel }) => {
       {/* Header */}
       <div className="bg-gradient-to-r from-pink-600 to-yellow-600 p-4 border-b-4 border-pink-400">
         <h2 className="text-2xl font-bold pixel-text text-white">
-          {isAddingNew ? 'NEW QUEST' : 'QUEST DETAILS'}
+          {isAddingNew ? 'NEW GAME' : 'GAME DETAILS'}
         </h2>
       </div>
 
@@ -183,37 +299,6 @@ const DetailsPanel = ({ game, isAddingNew, onSave, onCancel }) => {
             />
           </div>
 
-          {/* Release Date */}
-          <div className="space-y-2">
-            <Label htmlFor="releaseDate" className="text-lg font-mono text-yellow-300 flex items-center gap-2">
-              <Calendar className="w-5 h-5" />
-              RELEASE DATE
-            </Label>
-            <Input
-              id="releaseDate"
-              name="releaseDate"
-              type="date"
-              value={formData.releaseDate}
-              onChange={handleChange}
-              className="pixel-input bg-slate-900 border-2 border-cyan-500 text-white focus:border-yellow-400 font-mono p-4"
-            />
-          </div>
-
-          {/* Tags */}
-          <div className="space-y-2">
-            <Label htmlFor="tags" className="text-lg font-mono text-yellow-300">
-              TAGS (comma-separated)
-            </Label>
-            <Input
-              id="tags"
-              name="tags"
-              value={formData.tags}
-              onChange={handleChange}
-              placeholder="Action, RPG, Multiplayer..."
-              className="pixel-input bg-slate-900 border-2 border-cyan-500 text-white placeholder:text-slate-500 focus:border-yellow-400 font-mono p-4"
-            />
-          </div>
-
           {/* Action Buttons */}
           <div className="flex gap-4 pt-4">
             <Button
@@ -230,7 +315,7 @@ const DetailsPanel = ({ game, isAddingNew, onSave, onCancel }) => {
               className="flex-1 pixel-button bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-400 text-white border-4 border-green-400 py-6 text-lg font-bold shadow-[0_6px_0_rgba(0,0,0,0.3)] hover:shadow-[0_3px_0_rgba(0,0,0,0.3)] active:shadow-[0_1px_0_rgba(0,0,0,0.3)] hover:-translate-y-1 active:translate-y-1 transition-all duration-150"
             >
               <Save className="w-5 h-5 mr-2" />
-              SAVE QUEST
+              SAVE GAME
             </Button>
           </div>
         </form>

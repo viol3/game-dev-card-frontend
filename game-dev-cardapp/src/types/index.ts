@@ -5,8 +5,6 @@ export interface Game {
   description: string;
   image: string;
   platform: string;
-  releaseDate: string;
-  tags: string[];
 }
 
 export interface Profile {
