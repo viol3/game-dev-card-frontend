@@ -56,6 +56,7 @@ const CreateProfilePage = () =>
         target: `${PACKAGE.PACKAGEID}::${PACKAGE.MODULENAME}::${PACKAGE.CREATEPROFILEFUNC}`,
         arguments: [
           tx.pure.string(characterName), // name: String
+          tx.object(PACKAGE.DONKEYSADDLE)
         ],
       });
 

@@ -2,32 +2,62 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
 import { getProfile } from '../services/profileService';
-import { getGames } from '../services/gameService';
+import { getGames, getWalletAddressByProfileId, getProfileIdFromUsername } from '../services/gameService';
 import { ExternalLink, ArrowLeft, Gamepad2, Calendar, Tag } from 'lucide-react';
 
-const PublicPortfolio = () => {
+const PublicPortfolio = () => 
+  {
   const { username } = useParams();
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  const [profile, setProfile] = useState(null);
+  const [profile, setProfile] = useState(false);
   const [games, setGames] = useState([]);
 
-  useEffect(() => {
-    const savedProfile = getProfile();
-    if (savedProfile) {
-      const profileUsername = savedProfile.name.toLowerCase().replace(/[^a-z0-9]/g, '-');
-      if (profileUsername === username) {
-        setProfile(savedProfile);
-        setGames(getGames());
+  useEffect( () => 
+  {
+    const asyncChecks = async () => 
+    {
+      const profileId = await getProfileIdFromUsername(username);
+      if(profileId == "")
+      {
+        setProfile(false);
+        setLoading(false);
+        return
       }
+      const walletAddress = await getWalletAddressByProfileId(profileId)
+      if(walletAddress == "")
+      {
+        setProfile(false);
+        setLoading(false);
+        return
+      }
+      console.log("settings games with wallet address => " + walletAddress)
+      setGames(await getGames(walletAddress));
+      setLoading(false);
+      setProfile(true);
     }
-  }, [username]);
+    asyncChecks();
+    
+  }, [username, profile]);
+
+  if (loading) 
+  {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin mx-auto mb-6" />
+          <p className="text-cyan-300 font-mono text-xl">Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!profile) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
         <div className="text-center p-12">
           <div className="text-8xl mb-6">🕵️</div>
-          <h1 className="text-4xl font-bold pixel-text text-red-400 mb-4">QUEST NOT FOUND</h1>
+          <h1 className="text-4xl font-bold pixel-text text-red-400 mb-4">USER NOT FOUND</h1>
           <p className="text-xl font-mono text-slate-400 mb-8">This portfolio doesn't exist</p>
           <Button
             onClick={() => navigate('/')}
@@ -51,7 +81,8 @@ const PublicPortfolio = () => {
             <div
               key={i}
               className="absolute w-1 h-1 bg-cyan-400 animate-pulse"
-              style={{
+              style={
+              {
                 top: `${Math.random() * 100}%`,
                 left: `${Math.random() * 100}%`,
                 animationDelay: `${Math.random() * 2}s`,
@@ -126,34 +157,7 @@ const PublicPortfolio = () => {
                         <span className="font-mono text-slate-400">{game.platform}</span>
                       </div>
                     )}
-                    {game.releaseDate && (
-                      <div className="flex items-center gap-2 text-sm">
-                        <Calendar className="w-4 h-4 text-green-400" />
-                        <span className="font-mono text-slate-400">
-                          {new Date(game.releaseDate).toLocaleDateString('en-US', {
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric',
-                          })}
-                        </span>
-                      </div>
-                    )}
                   </div>
-
-                  {/* Tags */}
-                  {game.tags && game.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
-                      {game.tags.map((tag, idx) => (
-                        <span
-                          key={idx}
-                          className="bg-slate-900 text-pink-400 px-3 py-1 text-xs font-mono border-2 border-pink-600 flex items-center gap-1"
-                        >
-                          <Tag className="w-3 h-3" />
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  )}
 
                   {/* Link Button */}
                   {game.link && (
@@ -180,13 +184,13 @@ const PublicPortfolio = () => {
       <footer className="bg-slate-800/80 border-t-4 border-cyan-500 py-8 mt-20">
         <div className="container mx-auto px-4 text-center">
           <p className="text-lg font-mono text-slate-400">
-            Powered by <span className="text-cyan-400 font-bold">GameDev LinkTree</span>
+            Powered by <span className="text-cyan-400 font-bold">Cosgame.fun</span>
           </p>
           <Button
             onClick={() => navigate('/')}
             className="mt-4 pixel-button bg-green-600 hover:bg-green-500 text-white font-mono"
           >
-            CREATE YOUR OWN
+            CREATE YOUR OWN GAME DEV PORTFOLIO
           </Button>
         </div>
       </footer>

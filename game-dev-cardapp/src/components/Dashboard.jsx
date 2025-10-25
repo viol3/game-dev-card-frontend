@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { getProfile, deleteProfile } from '../services/profileService';
-import { getGames, addGame, updateGame, deleteGame } from '../services/gameService';
+import { getGames, addGame, updateGame, getWalletAddressByProfileId  } from '../services/gameService';
 import { useWallet } from '../contexts/WalletContext';
 import InventoryPanel from './InventoryPanel';
 import DetailsPanel from './DetailsPanel';
@@ -35,14 +35,12 @@ const Dashboard = () => {
     const checkSavedProfile = async () => 
     {
       const savedProfile = await getProfile(address);
-      console.log(savedProfile)
       if (!savedProfile) 
       {
         navigate('/create-profile');
         return;
       }
       setProfile(savedProfile);
-      console.log(savedProfile)
       setGames(await getGames(address));
     }
     checkSavedProfile();

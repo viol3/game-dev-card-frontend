@@ -6,14 +6,15 @@ export const STORAGE_KEYS =
 
 export const PACKAGE = 
 {
-  PACKAGEID: '0x5a0f0d1384acb11365b5da23e84f2d11bd95b83e97eefac9cdc81f9872d74201',
-  PROFILETYPE: '0x5a0f0d1384acb11365b5da23e84f2d11bd95b83e97eefac9cdc81f9872d74201::game_dev_card::GameDevCardProfile',
-  GAMETYPE: '0x5a0f0d1384acb11365b5da23e84f2d11bd95b83e97eefac9cdc81f9872d74201::game_dev_card::GameItem',
+  PACKAGEID: '0x471fd84d5a391aca7c324bb1e9ebc6d21f49b45d32e268d1fdb1683f15956024',
+  PROFILETYPE: '0x471fd84d5a391aca7c324bb1e9ebc6d21f49b45d32e268d1fdb1683f15956024::game_dev_card::GameDevCardProfile',
+  GAMETYPE: '0x471fd84d5a391aca7c324bb1e9ebc6d21f49b45d32e268d1fdb1683f15956024::game_dev_card::GameItem',
   MODULENAME: 'game_dev_card',
   CREATEPROFILEFUNC: 'create_game_dev_profile',
   ADDGAMEFUNC: 'add_game',
   UPDATEGAMEFUNC: 'update_game',
   DELETEGAMEFUNC: 'remove_game',
+  DONKEYSADDLE: '0x8c7fb9842cb1b969c83fbc9c5ff7c747b9c3f2d97a3d60c8ac9fb3448ed63eba'
 } as const;
 
 export const ROUTES = {
@@ -21,7 +22,7 @@ export const ROUTES = {
   HOME: '/home',
   CREATE_PROFILE: '/create-profile',
   DASHBOARD: '/dashboard',
-  PORTFOLIO: '/portfolio/:username',
+  PORTFOLIO: '/:username',
   EXPLORER: '/explorer',
 } as const;
 

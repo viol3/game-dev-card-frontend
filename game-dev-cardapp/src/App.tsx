@@ -55,9 +55,7 @@ function App() {
             <Route 
               path={ROUTES.PORTFOLIO} 
               element={
-                <ProtectedRoute>
                   <PublicPortfolio />
-                </ProtectedRoute>
               } 
             />
           </Routes>
