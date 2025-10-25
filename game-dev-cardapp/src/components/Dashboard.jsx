@@ -73,6 +73,7 @@ const Dashboard = () => {
       // Add new game
       const newGame = await addGame(gameData, address);
       setGames(await getGames(address));
+      console.log("updating games from adding new game");
       setSelectedGame(newGame);
       toast(
       {
@@ -120,6 +121,12 @@ const Dashboard = () => {
                   title: 'Game Removed',
                   description: 'Game has been removed from your inventory.',
                 });
+                const updateGamesAsync = async (address) =>
+                {
+                  setGames(await getGames(address));
+                };
+                updateGamesAsync(address)
+                console.log("games updating");
               },
               onError: (error) => 
               {
@@ -134,8 +141,7 @@ const Dashboard = () => {
               },
             }
           );
-          setGames(await getGames(address));
-          console.log("games updated")
+          
         } catch (error) 
         {
           console.error('Transaction error:', error);

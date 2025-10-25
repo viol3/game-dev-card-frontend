@@ -147,6 +147,7 @@ const DetailsPanel = ({ game, isAddingNew, onSave, onCancel }) => {
             }
 
             setIsSubmitting(false);
+            
           },
           onError: (error) => {
             console.error('Error adding game:', error);

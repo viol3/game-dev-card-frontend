@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ConnectButton, useCurrentAccount, useSuiClient  } from '@mysten/dapp-kit';
 import { Wallet, Shield, Zap } from 'lucide-react';
@@ -10,14 +10,11 @@ const ConnectWalletPage = () => {
   const navigate = useNavigate();
   const account = useCurrentAccount();
   const suiClient = useSuiClient();
-  const [isChecking, setIsChecking] = useState(false);
   useEffect(() => 
   {
     const checkProfileAndNavigate = async () => 
       {
       if (!account?.address) return;
-
-      setIsChecking(true);
       
       try 
       {
@@ -56,7 +53,7 @@ const ConnectWalletPage = () => {
       } 
       finally 
       {
-        setIsChecking(false);
+
       }
     };
     // Wallet bağlandığında home sayfasına yönlendir
