@@ -1,20 +1,64 @@
 import type { Profile } from '../types';
-import { STORAGE_KEYS } from '../constants';
+//import { useSuiClient  } from '@mysten/dapp-kit';
+import { SuiClient, getFullnodeUrl } from '@mysten/sui/client';
+import { STORAGE_KEYS, PACKAGE } from '../constants';
 
 /**
  * Get profile from localStorage by wallet address
  */
-export const getProfile = (walletAddress?: string): Profile | null => {
-  try {
-    if (walletAddress) {
-      const stored = localStorage.getItem(`${STORAGE_KEYS.PROFILE}_${walletAddress}`);
-      return stored ? JSON.parse(stored) : null;
+export const getProfile = async (walletAddress?: string): Promise<Profile | null> => 
+{
+  try 
+  {
+    if (!walletAddress) 
+    {
+      return null;
     }
-    // Fallback to old storage for backward compatibility
-    const stored = localStorage.getItem(STORAGE_KEYS.PROFILE);
-    return stored ? JSON.parse(stored) : null;
-  } catch (error) {
-    console.error('Error reading profile from localStorage:', error);
+
+    const client = new SuiClient({ url: getFullnodeUrl('testnet') });
+    
+    const ownedObjects = await client.getOwnedObjects(
+    {
+      owner: walletAddress,
+      filter: {
+        StructType: PACKAGE.PROFILETYPE
+      },
+      options: {
+        showType: true,
+        showContent: true,
+      },
+    });
+
+    if (ownedObjects.data.length === 0) {
+      return null;
+    }
+
+    // İlk profile objesini al
+    const profileData = ownedObjects.data[0];
+    
+    if (profileData.data?.content && 'fields' in profileData.data.content) {
+      const fields = profileData.data.content.fields as any;
+      
+      const profile: Profile = 
+      {
+        name: fields.name || ''
+
+      };
+
+      // Blockchain'den alınan profili localStorage'a kaydet
+      localStorage.setItem(
+        `${STORAGE_KEYS.PROFILE}_${walletAddress}`,
+        JSON.stringify(profile)
+      );
+
+      return profile;
+    }
+
+    return null;
+  } 
+  catch (error) 
+  {
+    console.error('Error reading profile:', error);
     return null;
   }
 };
@@ -23,7 +67,8 @@ export const getProfile = (walletAddress?: string): Profile | null => {
  * Save profile to localStorage with wallet address
  */
 export const saveProfile = (profile: Profile, walletAddress: string): void => {
-  try {
+  try 
+  {
     const profileWithWallet = {
       ...profile,
       walletAddress,

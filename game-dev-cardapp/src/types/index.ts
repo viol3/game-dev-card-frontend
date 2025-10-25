@@ -11,9 +11,9 @@ export interface Game {
 
 export interface Profile {
   name: string;
-  username: string;
-  bio: string;
-  walletAddress: string;
+  username?: string;
+  bio?: string;
+  walletAddress?: string;
   avatar?: string;
   createdAt?: string;
   updatedAt?: string;

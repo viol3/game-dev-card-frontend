@@ -20,19 +20,26 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { address, disconnect } = useWallet();
 
-  useEffect(() => {
-    if (!address) {
+  useEffect(() => 
+  {
+    if (!address) 
+    {
       navigate('/');
       return;
     }
-    
-    const savedProfile = getProfile(address);
-    if (!savedProfile) {
-      navigate('/create-profile');
-      return;
+    const checkSavedProfile = async () => 
+    {
+      const savedProfile = await getProfile(address);
+      console.log(savedProfile)
+      if (!savedProfile) 
+      {
+        navigate('/create-profile');
+        return;
+      }
+      setProfile(savedProfile);
+      setGames(getGames(address));
     }
-    setProfile(savedProfile);
-    setGames(getGames(address));
+    checkSavedProfile();
   }, [navigate, address]);
 
   const handleAddGame = () => {
@@ -40,58 +47,69 @@ const Dashboard = () => {
     setSelectedGame(null);
   };
 
-  const handleSaveGame = (gameData) => {
+  const handleSaveGame = (gameData) => 
+  {
     if (!address) return;
     
-    if (selectedGame) {
+    if (selectedGame) 
+    {
       // Update existing game
       const updated = updateGame(selectedGame.id, gameData, address);
       setGames(getGames(address));
       setSelectedGame(updated);
       toast({
-        title: 'Quest Updated!',
+        title: 'Game Updated!',
         description: 'Your game has been successfully updated.',
       });
-    } else {
+    } 
+    else 
+    {
       // Add new game
       const newGame = addGame(gameData, address);
       setGames(getGames(address));
       setSelectedGame(newGame);
-      toast({
-        title: 'New Quest Added!',
+      toast(
+      {
+        title: 'New Game Added!',
         description: 'Your game has been added to your inventory.',
       });
     }
     setIsAddingNew(false);
   };
 
-  const handleDeleteGame = (id) => {
+  const handleDeleteGame = (id) => 
+  {
     if (!address) return;
     
     deleteGame(id, address);
     setGames(getGames(address));
-    if (selectedGame?.id === id) {
+    if (selectedGame?.id === id) 
+    {
       setSelectedGame(null);
     }
-    toast({
-      title: 'Quest Removed',
+    toast(
+    {
+      title: 'Game Removed',
       description: 'Game has been removed from your inventory.',
     });
   };
 
-  const handleSelectGame = (game) => {
+  const handleSelectGame = (game) => 
+  {
     setSelectedGame(game);
     setIsAddingNew(false);
   };
 
-  const handleLogout = () => {
+  const handleLogout = () => 
+  {
     if (window.confirm('Are you sure you want to disconnect your wallet?')) {
       disconnect();
       navigate('/');
     }
   };
 
-  const handleShare = () => {
+  const handleShare = () => 
+  {
     if (profile) {
       const username = profile.name.toLowerCase().replace(/[^a-z0-9]/g, '-');
       const shareUrl = `${window.location.origin}/portfolio/${username}`;
@@ -103,11 +121,14 @@ const Dashboard = () => {
     }
   };
 
-  const handleCopyAddress = async () => {
-    if (address) {
+  const handleCopyAddress = async () =>
+  {
+    if (address) 
+    {
       await navigator.clipboard.writeText(address);
       setCopiedAddress(true);
-      toast({
+      toast(
+      {
         title: 'Address Copied!',
         description: 'Wallet address copied to clipboard.',
       });
@@ -115,7 +136,8 @@ const Dashboard = () => {
     }
   };
 
-  const formatAddress = (addr) => {
+  const formatAddress = (addr) => 
+  {
     if (!addr) return '';
     return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
   };

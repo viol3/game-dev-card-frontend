@@ -21,7 +21,7 @@ const InventoryPanel = ({ games, selectedGame, onSelectGame, onAddGame, onDelete
           className="w-full pixel-button bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-400 text-white border-4 border-green-400 py-6 text-lg font-bold shadow-[0_4px_0_rgba(0,0,0,0.3)] hover:shadow-[0_2px_0_rgba(0,0,0,0.3)] active:shadow-[0_1px_0_rgba(0,0,0,0.3)] hover:-translate-y-1 active:translate-y-1 transition-all duration-150"
         >
           <Plus className="w-6 h-6 mr-2" />
-          ADD NEW QUEST
+          ADD NEW GAME
         </Button>
       </div>
 
@@ -31,8 +31,8 @@ const InventoryPanel = ({ games, selectedGame, onSelectGame, onAddGame, onDelete
           {games.length === 0 ? (
             <div className="text-center py-12">
               <div className="text-6xl mb-4">🎮</div>
-              <p className="text-lg font-mono text-slate-400">No quests yet!</p>
-              <p className="text-sm font-mono text-slate-500 mt-2">Click "ADD NEW QUEST" to start</p>
+              <p className="text-lg font-mono text-slate-400">No games yet!</p>
+              <p className="text-sm font-mono text-slate-500 mt-2">Click "ADD NEW GAME" to start</p>
             </div>
           ) : (
             games.map((game) => (

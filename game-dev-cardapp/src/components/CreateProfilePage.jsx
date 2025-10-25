@@ -14,20 +14,25 @@ const CreateProfilePage = () => {
   const navigate = useNavigate();
   const { address } = useWallet();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e) => 
+    {
     e.preventDefault();
     
-    if (!characterName.trim()) {
-      toast({
-        title: 'Quest Failed!',
+    if (!characterName.trim()) 
+    {
+      toast(
+      {
+        title: 'Character Creation Failed!',
         description: 'Please enter a character name to continue.',
         variant: 'destructive',
       });
       return;
     }
 
-    if (!address) {
-      toast({
+    if (!address) 
+    {
+      toast(
+      {
         title: 'Wallet Not Connected!',
         description: 'Please connect your wallet first.',
         variant: 'destructive',
@@ -35,7 +40,8 @@ const CreateProfilePage = () => {
       return;
     }
 
-    const profile = {
+    const profile = 
+    {
       name: characterName,
       username: generateUsername(characterName),
       bio: bio || `Game developer and pixel art enthusiast`,
@@ -45,7 +51,7 @@ const CreateProfilePage = () => {
 
     saveProfile(profile, address);
     toast({
-      title: 'Character Created!',
+      title: 'Character created!',
       description: `Welcome, ${characterName}! Your quest begins now.`,
     });
     navigate('/dashboard');

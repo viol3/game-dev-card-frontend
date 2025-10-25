@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Dev Card</title>
+    <style>
+        /* 1. Pixel Art Font İçe Aktarma */
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P');
+    
+        
+        /* 2. Temel Sayfa Stilleri */
+        body {
+            background-color: white;
+            font-family: 'Press Start 2P', cursive;
+            margin: 0;
+            padding: 0;
+            overflow: hidden; 
+        }
+
+        /* 3. Ana Başlık */
+        h1 {
+            text-align: center;
+            font-size: 2rem;
+            color: black;
+            position: relative;
+            z-index: 100;
+            background: white;
+            padding: 15px 0 10px 0;
+            margin: 0;
+        }
+        
+        /* 4. Portfolio Çubuğu */
+        .portfolio-bar {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            padding: 15px 0;
+            background: white;
+            position: relative;
+            z-index: 100;
+            border-bottom: 6px solid black;
+            font-size: 0.7rem;
+            flex-wrap: wrap;
+            min-height: 48px; 
+            box-sizing: content-box;
+        }
+
+        /* 5. Connect Wallet Butonu */
+        #connect-wallet-btn {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.8rem;
+            border: 4px solid black;
+            padding: 10px 15px;
+            background-color: #ffd700;
+            cursor: pointer;
+            color: black;
+        }
+        #connect-wallet-btn:active {
+            background-color: #e6c300;
+        }
+
+        /* 6. Input Grubu */
+        #portfolio-input-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        #portfolio-input-group label {
+            font-size: 0.7rem;
+            white-space: nowrap;
+        }
+
+        #portfolio-input-group input[type="text"] {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.7rem;
+            border: 4px solid black;
+            padding: 8px;
+            background: #f0f0f0;
+            width: 150px;
+        }
+
+        #portfolio-input-group button {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.7rem;
+            border: 4px solid black;
+            padding: 8px 12px;
+            background-color: #ddd;
+            cursor: pointer;
+            color: black;
+        }
+        #portfolio-input-group button:active {
+            background-color: #ccc;
+        }
+        
+        /* 7. Gizleme Sınıfı */
+        .hidden {
+            display: none;
+        }
+
+
+        /* 8. Kartların Akacağı Ana Konteyner */
+        #card-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden; 
+            padding-top: 160px; /* Üst çubuğun yüksekliğine göre ayarlandı */
+            box-sizing: border-box;
+            z-index: 1; /* Başlığın altında */
+        }
+        
+        /* 9. Portfolio Sayfası */
+        #portfolio-page {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            padding-top: 160px; 
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: white;
+            z-index: 2;
+            text-align: center;
+        }
+
+        #portfolio-page h2 {
+            font-size: 1.2rem;
+            color: black;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+
+        #portfolio-page button {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.8rem;
+            border: 4px solid black;
+            padding: 10px 15px;
+            background-color: #ffd700; 
+            cursor: pointer;
+            color: black;
+        }
+        
+        /* 10. YENİ: Oyun Listesi ve + Butonu */
+        #game-list-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            width: 100%;
+            padding: 20px;
+        }
+
+        #game-list {
+            display: flex;
+            flex-wrap: wrap; /* Birden fazla oyun sığsın */
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .portfolio-game-item {
+            border: 4px solid black;
+            background: #f0f0f0;
+            padding: 20px;
+            width: 250px;
+            text-align: left;
+        }
+
+        .portfolio-game-item h3 {
+            font-size: 0.9rem;
+            margin: 0 0 15px 0;
+            word-wrap: break-word;
+        }
+        
+        .portfolio-game-item a {
+            font-size: 0.7rem;
+            color: #0000FF;
+            text-decoration: underline;
+        }
+
+        #add-new-plus-btn {
+            font-size: 3rem;
+            line-height: 1;
+            padding: 10px 25px;
+            background: #b2f2bb; /* Yeşil */
+            border: 4px solid black;
+            cursor: pointer;
+        }
+
+        /* 11. YENİ: Modal Stilleri */
+        #game-modal {
+            position: fixed;
+            z-index: 1001; /* Her şeyin üstünde */
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            font-family: 'Press Start 2P', cursive;
+            background: white;
+            border: 4px solid black;
+            padding: 30px;
+            width: 90%;
+            max-width: 400px;
+            position: relative;
+        }
+        
+        #close-modal {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 2rem;
+            color: black;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .modal-content h2 {
+            font-size: 1rem;
+            margin-top: 0;
+        }
+
+        .modal-content label {
+            font-size: 0.7rem;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .modal-content input[type="text"] {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.7rem;
+            border: 4px solid black;
+            padding: 8px;
+            background: #f0f0f0;
+            width: 100%;
+            box-sizing: border-box; /* Padding dahil */
+            margin-bottom: 15px;
+        }
+
+        .modal-content button {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.8rem;
+            border: 4px solid black;
+            padding: 10px 15px;
+            background-color: #ffd700;
+            cursor: pointer;
+            color: black;
+            width: 100%;
+        }
+
+        /* 12. Diğer Stiller... */
+        .column {
+            display: flex;
+            flex-direction: column;
+            width: 280px;
+            animation-name: scrollUp;
+            animation-timing-function: linear;
+            animation-iteration-count: infinite;
+        }
+
+        @keyframes scrollUp {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-50%); }
+        }
+
+        .game-card {
+            border: 4px solid black;
+            padding: 15px;
+            margin-bottom: 20px;
+            width: 100%;
+            box-sizing: border-box;
+            background-color: #f0f0f0; 
+        }
+        
+        .game-card.blue { background-color: #aadaff; border-color: #0000FF; }
+        .game-card.green { background-color: #b2f2bb; border-color: #008000; }
+        .game-card.yellow { background-color: #fff1a8; border-color: #e6a100; }
+        .game-card.red { background-color: #ffb3b3; border-color: #FF0000; }
+        .game-card.default { background-color: #f0f0f0; border-color: #000000; }
+
+        .game-card h2 {
+            font-size: 0.9rem;
+            margin: 0 0 10px 0;
+            color: #333;
+            word-wrap: break-word;
+        }
+        .game-card p {
+            font-size: 0.6rem;
+            margin: 0 0 8px 0;
+            line-height: 1.4;
+        }
+        .game-card ul {
+            font-size: 0.6rem;
+            margin: 0;
+            padding-left: 20px;
+        }
+        .game-card li {
+            margin-bottom: 5px;
+        }
+        .game-card h2 a,
+        .game-card li a {
+            color: inherit;
+            text-decoration: none;
+        }
+        .game-card h2 a:hover,
+        .game-card li a:hover {
+            text-decoration: underline;
+            color: #000;
+        }
+
+    </style>
+</head>
+<body>
+
+    <h1>Game Dev Card</h1>
+    
+    <div class="portfolio-bar">
+        
+        <button id="connect-wallet-btn">Connect Wallet</button>
+
+        <div id="portfolio-input-group" style="display: none">
+            <label for="portfolio-id">Create your portfolio:</label>
+            <input type="text" id="portfolio-id" placeholder="your-id">
+            <button id="go-btn">Go!</button>
+        </div>
+    </div>
+
+    <div id="card-container">
+    </div>
+
+    <div id="portfolio-page" style="display: none">
+        
+        <h2 id="no-games-text">You don't have any games</h2>
+        <button id="add-game-btn">Add a new game</button>
+
+        <div id="game-list-wrapper" style="display: none"> <div id="game-list">
+                </div>
+				</br>
+            <button id="add-new-plus-btn">+</button>
+        </div>
+
+    </div>
+
+    <div id="game-modal" style="display: none">
+        <div class="modal-content">
+            <span id="close-modal">&times;</span>
+            <h2>Add New Game</h2>
+            <label for="game-name-input">Game Name:</label>
+            <input type="text" id="game-name-input" placeholder="My Pixel Adventure">
+            <label for="game-link-input">Game Link:</label>
+            <input type="text" id="game-link-input" placeholder="https://mygame.com">
+            <button id="submit-game-btn">Submit</button>
+        </div>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- KART VERİLERİ ---
+            const devData = [
+                { name: 'PixelPioneer 🚀', games: ['Cyber Glitch', '8-Bit Brawl'] },
+                { name: 'RetroDev', games: ['Dungeon Dash ⚔️', 'Star Jumper'] },
+                { name: 'ByteWizard 🧙', games: ['Neon Racer 🏎️', 'Pixel Quest'] },
+                // ... (diğer veriler)
+                { name: 'BuildBob 🛠️', games: ['Crafty Miner', 'Tower Tycoon'] },
+                { name: 'ArtfulAnna', games: ['BrushStroke', 'Canvas Chaos'] }
+            ];
+
+            const colors = ['default', 'blue', 'green', 'yellow', 'red'];
+            const NUM_COLUMNS = 5; 
+            
+            const cardContainer = document.getElementById('card-container');
+            const portfolioPage = document.getElementById('portfolio-page');
+            
+            const columns = [];
+
+            // --- KART OLUŞTURMA FONKSİYONU ---
+            const createCardHTML = (dev) => {
+                const gamesList = dev.games.map(game => `<li><a href="#">${game}</a></li>`).join('');
+                const randomColor = colors[Math.floor(Math.random() * colors.length)];
+                return `
+                    <div class="game-card ${randomColor}"> 
+                        <h2><a href="#">${dev.name}</a></h2>
+                        <p>Oyunları:</p>
+                        <ul>${gamesList}</ul>
+                    </div>
+                `;
+            };
+
+            // --- SÜTUNLARI VE KARTLARI OLUŞTURMA ---
+            for (let i = 0; i < NUM_COLUMNS; i++) {
+                const column = document.createElement('div');
+                column.className = 'column';
+                const content = document.createElement('div');
+                content.className = 'column-content';
+                column.appendChild(content);
+                cardContainer.appendChild(column);
+                columns.push(content); 
+                const duration = Math.random() * 20 + 30;
+                column.style.animationDuration = `${duration}s`;
+            }
+
+            const fullData = [...devData, ...devData, ...devData, ...devData]; 
+            fullData.forEach((dev, index) => {
+                const columnIndex = index % NUM_COLUMNS;
+                columns[columnIndex].innerHTML += createCardHTML(dev);
+            });
+
+            columns.forEach(content => {
+                const clone = content.cloneNode(true);
+                content.parentElement.appendChild(clone);
+            });
+
+
+            // --- SAYFA GEÇİŞ LOGİĞİ ---
+            
+            // Çubuk elemanları
+            const connectWalletBtn = document.getElementById('connect-wallet-btn');
+            const portfolioGroup = document.getElementById('portfolio-input-group');
+            const goBtn = document.getElementById('go-btn');
+
+            // 1. Connect Wallet butonu olayı
+            connectWalletBtn.addEventListener('click', () => {
+                connectWalletBtn.style.display = "none";
+                portfolioGroup.style.display = "flex";
+            });
+
+            // 2. Go butonu olayı
+            goBtn.addEventListener('click', (event) => {
+                event.preventDefault();
+                cardContainer.style.display = "none"
+				
+				portfolioGroup.style.display = "none";
+                portfolioPage.style.display = "flex"; // "block" yerine "flex" kullandım
+            });
+
+
+            // --- YENİ: MODAL VE PORTFOLYO LOGİĞİ ---
+
+            // Modal elemanlarını seç
+            const gameModal = document.getElementById('game-modal');
+            const addGameBtn = document.getElementById('add-game-btn');
+            const closeModalBtn = document.getElementById('close-modal');
+            const submitGameBtn = document.getElementById('submit-game-btn');
+            
+            // Portfolyo sayfası elemanlarını seç
+            const noGamesText = document.getElementById('no-games-text');
+            const gameListWrapper = document.getElementById('game-list-wrapper');
+            const gameList = document.getElementById('game-list');
+            const addNewPlusBtn = document.getElementById('add-new-plus-btn');
+
+            // Modal inputlarını seç
+            const gameNameInput = document.getElementById('game-name-input');
+            const gameLinkInput = document.getElementById('game-link-input');
+
+
+            // "Add a new game" butonu modalı açar
+            addGameBtn.addEventListener('click', () => {
+                gameModal.style.display = "flex";
+            });
+
+            // "X" butonu modalı kapatır
+            closeModalBtn.addEventListener('click', () => {
+                gameModal.style.display = "none";
+            });
+
+            // "+" butonu da modalı açar
+            addNewPlusBtn.addEventListener('click', () => {
+                gameModal.style.display = "flex";
+            });
+
+            // "Submit" butonu oyunu ekler
+            submitGameBtn.addEventListener('click', (event) => {
+                event.preventDefault();
+                
+                const gameName = gameNameInput.value;
+                const gameLink = gameLinkInput.value;
+
+                // Basit doğrulama
+                if (!gameName || !gameLink) {
+                    alert('Lütfen tüm alanları doldurun!');
+                    return;
+                }
+
+                // 1. "You don't have any games" yazısını ve butonunu gizle
+                noGamesText.style.display = "none";
+                addGameBtn.style.display = "none";
+
+                // 2. Yeni oyun HTML'ini oluştur
+                const newGameHTML = `
+                    <div class="portfolio-game-item">
+                        <h3>${gameName}</h3>
+                        <a href="${gameLink}" target="_blank">Play Now</a>
+                    </div>
+                `;
+
+                // 3. Oyunu listeye ekle
+                gameList.innerHTML += newGameHTML;
+
+                // 4. Oyun listesini ve + butonunu göster
+                gameListWrapper.style.display = 'block';
+                // style.display = "flex" de kullanabilirdin
+                
+                // 5. Input'ları temizle ve modalı kapat
+                gameNameInput.value = '';
+                gameLinkInput.value = '';
+                gameModal.style.display = "none";
+            });
+
+        });
+    </script>
+
+</body>
+</html>

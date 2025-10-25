@@ -1,6 +1,13 @@
-export const STORAGE_KEYS = {
-  PROFILE: 'gamedev_profile',
-  GAMES: 'gamedev_games',
+export const STORAGE_KEYS = 
+{
+  PROFILE: 'gamedev_profile_new',
+  GAMES: 'gamedev_games_new',
+} as const;
+
+export const PACKAGE = 
+{
+  PACKAGEID: '0xfa452d6ae9520d9ad83c1172ce5c6a1170df245df66cc10f6fc035c913bbdeb3',
+  PROFILETYPE: '0xfa452d6ae9520d9ad83c1172ce5c6a1170df245df66cc10f6fc035c913bbdeb3::game_dev_card::GameDevCardProfile',
 } as const;
 
 export const ROUTES = {

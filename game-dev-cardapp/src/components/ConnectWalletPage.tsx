@@ -1,17 +1,69 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ConnectButton, useCurrentAccount } from '@mysten/dapp-kit';
+import { ConnectButton, useCurrentAccount, useSuiClient  } from '@mysten/dapp-kit';
 import { Wallet, Shield, Zap } from 'lucide-react';
-import { ROUTES } from '../constants';
+import { ROUTES, PACKAGE } from '../constants';
+
+
 
 const ConnectWalletPage = () => {
   const navigate = useNavigate();
   const account = useCurrentAccount();
+  const suiClient = useSuiClient();
+  const [isChecking, setIsChecking] = useState(false);
+  useEffect(() => 
+  {
+    const checkProfileAndNavigate = async () => 
+      {
+      if (!account?.address) return;
 
-  useEffect(() => {
+      setIsChecking(true);
+      
+      try 
+      {
+        // Profile objesini kontrol et
+        const ownedObjects = await suiClient.getOwnedObjects(
+        {
+          owner: account.address,
+          filter: 
+          {
+            StructType: PACKAGE.PROFILETYPE
+          },
+          options: 
+          {
+            showType: true,
+            showContent: true,
+          },
+        });
+
+        // Eğer profile varsa DASHBOARD'a, yoksa HOME'a yönlendir
+        if (ownedObjects.data.length > 0) 
+        {
+          console.log('Profile bulundu, DASHBOARD\'a yönlendiriliyor...');
+          navigate(ROUTES.DASHBOARD);
+        } 
+        else 
+        {
+          console.log('Profile bulunamadı, HOME\'a yönlendiriliyor...');
+          navigate(ROUTES.HOME);
+        }
+      } 
+      catch (error) 
+      {
+        console.error('Profile kontrolü başarısız:', error);
+        // Hata durumunda HOME'a yönlendir
+        navigate(ROUTES.HOME);
+      } 
+      finally 
+      {
+        setIsChecking(false);
+      }
+    };
     // Wallet bağlandığında home sayfasına yönlendir
-    if (account) {
-      navigate(ROUTES.HOME);
+    if (account) 
+    {
+      checkProfileAndNavigate();
+      //navigate(ROUTES.HOME);
     }
   }, [account, navigate]);
 
