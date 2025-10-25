@@ -21,7 +21,7 @@ export const getProfileIdFromUsername = async (username: string): Promise<string
       // Username'i ara
       const found = response.data.find(
         field => field.name.value === username
-      );
+      ); 
 
       if (found) 
       {
