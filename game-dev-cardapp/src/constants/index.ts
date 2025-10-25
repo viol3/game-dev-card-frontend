@@ -6,12 +6,13 @@ export const STORAGE_KEYS =
 
 export const PACKAGE = 
 {
-  PACKAGEID: '0xfa452d6ae9520d9ad83c1172ce5c6a1170df245df66cc10f6fc035c913bbdeb3',
-  PROFILETYPE: '0xfa452d6ae9520d9ad83c1172ce5c6a1170df245df66cc10f6fc035c913bbdeb3::game_dev_card::GameDevCardProfile',
-  GAMETYPE: '0xfa452d6ae9520d9ad83c1172ce5c6a1170df245df66cc10f6fc035c913bbdeb3::game_dev_card::GameItem',
+  PACKAGEID: '0x8123fca0c5d2f3ce6b3971b83e197393c52732348c6ca56a6fb914844dd36a2b',
+  PROFILETYPE: '0x8123fca0c5d2f3ce6b3971b83e197393c52732348c6ca56a6fb914844dd36a2b::game_dev_card::GameDevCardProfile',
+  GAMETYPE: '0x8123fca0c5d2f3ce6b3971b83e197393c52732348c6ca56a6fb914844dd36a2b::game_dev_card::GameItem',
   MODULENAME: 'game_dev_card',
   CREATEPROFILEFUNC: 'create_game_dev_profile',
   ADDGAMEFUNC: 'add_game_to_profile',
+  UPDATEGAMEFUNC: 'update_game_on_profile',
 } as const;
 
 export const ROUTES = {

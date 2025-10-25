@@ -87,7 +87,99 @@ const DetailsPanel = ({ game, isAddingNew, onSave, onCancel }) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleUpdateGame = (e) => 
+  {
+    e.preventDefault();
+    
+    if (!formData.name.trim()) {
+      alert('Please enter a game name!');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // Transaction oluştur
+      const tx = new Transaction();
+      
+      tx.moveCall(
+      {
+        target: `${PACKAGE.PACKAGEID}::${PACKAGE.MODULENAME}::${PACKAGE.UPDATEGAMEFUNC}`,
+        arguments: [
+          tx.object(profileObjectId),
+          tx.object(game.id),                    // mut profile: GameDevCardProfile
+          tx.pure.string(formData.name),                 // game_name: String
+          tx.pure.string(formData.link),             // game_link: String
+          tx.pure.string(formData.description || ''),    // description: String
+          tx.pure.string(formData.image || ''),       // image_url: String
+          tx.pure.string(formData.platform || ''),       // platform: String
+        ],
+      });
+
+      // Transaction'ı imzala ve gönder
+      signAndExecute(
+        {
+          transaction: tx,
+        },
+        {
+          onSuccess: (result) => 
+          {
+            console.log('Game updated successfully:', result);
+            
+            toast({
+              title: 'Game Updated! 🎮',
+              description: `${formData.name} has been updated on your portfolio.`,
+            });
+
+            // Form'u temizle
+            setFormData(
+            {
+              name: '',
+              gameLink: '',
+              description: '',
+              imageUrl: '',
+              platform: '',
+            });
+
+            // Parent component'e bildir (varsa)
+            if (onSave) {
+              onSave(formData);
+            }
+
+            setIsSubmitting(false);
+          },
+          onError: (error) => {
+            console.error('Error adding game:', error);
+            
+            toast({
+              title: 'Failed to Add Game!',
+              description: error.message || 'An error occurred. Please try again.',
+              variant: 'destructive',
+            });
+            
+            setIsSubmitting(false);
+          },
+        }
+      );
+    } catch (error) 
+    {
+      console.error('Transaction error:', error);
+      
+      toast(
+      {
+        title: 'Transaction Error!',
+        description: 'An error occurred. Please try again.',
+        variant: 'destructive',
+      });
+      
+      setIsSubmitting(false);
+    }
+
+
+  };
+
+  const handleSubmit = (e) => 
+  {
     e.preventDefault();
     
     if (!formData.name.trim()) {
@@ -204,7 +296,7 @@ const DetailsPanel = ({ game, isAddingNew, onSave, onCancel }) => {
 
       {/* Form */}
       <div className="flex-1 overflow-y-auto p-6">
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={isAddingNew ? handleSubmit : handleUpdateGame} className="space-y-6">
           {/* Game Name */}
           <div className="space-y-2">
             <Label htmlFor="name" className="text-lg font-mono text-yellow-300 flex items-center gap-2">

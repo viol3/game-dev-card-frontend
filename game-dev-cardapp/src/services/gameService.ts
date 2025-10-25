@@ -92,7 +92,8 @@ export const addGame = async (game: Omit<Game, 'id'>, walletAddress: string): Pr
 /**
  * Update an existing game
  */
-export const updateGame = async (id: string, updatedGame: Partial<Game>, walletAddress: string): Promise<Game | null> => {
+export const updateGame = async (id: string, updatedGame: Partial<Game>, walletAddress: string): Promise<Game | null> => 
+{
   const games = await getGames(walletAddress);
   const index = games.findIndex((g) => g.id === id);
   
