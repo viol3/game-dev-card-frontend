@@ -7,7 +7,9 @@ export interface Game {
   platform: string;
 }
 
-export interface Profile {
+export interface Profile 
+{
+  id: string;
   name: string;
   username?: string;
   bio?: string;

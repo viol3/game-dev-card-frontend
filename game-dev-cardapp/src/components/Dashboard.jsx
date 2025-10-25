@@ -9,6 +9,9 @@ import InventoryPanel from './InventoryPanel';
 import DetailsPanel from './DetailsPanel';
 import SpaceExplorer from './SpaceExplorer';
 import { LogOut, Share2, User, Rocket, Gamepad2, Copy, Check } from 'lucide-react';
+import { PACKAGE } from '../constants';
+import { useCurrentAccount, useSignAndExecuteTransaction, useSuiClient } from '@mysten/dapp-kit';
+import { Transaction } from '@mysten/sui/transactions';
 import { toast } from '../hooks/use-toast';
 
 const Dashboard = () => {
@@ -19,7 +22,9 @@ const Dashboard = () => {
   const [copiedAddress, setCopiedAddress] = useState(false);
   const navigate = useNavigate();
   const { address, disconnect } = useWallet();
-
+  const account = useCurrentAccount();
+  const suiClient = useSuiClient();
+  const { mutate: signAndExecute } = useSignAndExecuteTransaction();
   useEffect(() => 
   {
     if (!address) 
@@ -37,6 +42,7 @@ const Dashboard = () => {
         return;
       }
       setProfile(savedProfile);
+      console.log(savedProfile)
       setGames(await getGames(address));
     }
     checkSavedProfile();
@@ -79,19 +85,70 @@ const Dashboard = () => {
 
   const handleDeleteGame = async (id) => 
   {
+    console.log("Removing => " + id)
+    console.log("Profile id => " + profile.id)
     if (!address) return;
+    try {
+          // Transaction oluştur
+          const tx = new Transaction();
+          
+          tx.moveCall(
+          {
+            target: `${PACKAGE.PACKAGEID}::${PACKAGE.MODULENAME}::${PACKAGE.DELETEGAMEFUNC}`,
+            arguments: 
+            [
+              tx.object(profile.id),
+              tx.object(id),                    // mut profile: GameDevCardProfile
+            ],
+          });
     
-    await deleteGame(id, address);
-    setGames(await getGames(address));
-    if (selectedGame?.id === id) 
-    {
-      setSelectedGame(null);
-    }
-    toast(
-    {
-      title: 'Game Removed',
-      description: 'Game has been removed from your inventory.',
-    });
+          // Transaction'ı imzala ve gönder
+          signAndExecute(
+            {
+              transaction: tx,
+            },
+            {
+              onSuccess: (result) => 
+              {
+  
+                if (selectedGame?.id === id) 
+                {
+                  setSelectedGame(null);
+                }
+                toast(
+                {
+                  title: 'Game Removed',
+                  description: 'Game has been removed from your inventory.',
+                });
+              },
+              onError: (error) => 
+              {
+                console.error('Error adding game:', error);
+                
+                toast({
+                  title: 'Failed to Remove Game!',
+                  description: error.message || 'An error occurred. Please try again.',
+                  variant: 'destructive',
+                });
+                
+              },
+            }
+          );
+          setGames(await getGames(address));
+          console.log("games updated")
+        } catch (error) 
+        {
+          console.error('Transaction error:', error);
+          
+          toast(
+          {
+            title: 'Transaction Error!',
+            description: 'An error occurred. Please try again.',
+            variant: 'destructive',
+          });
+          
+          setIsSubmitting(false);
+        }
   };
 
   const handleSelectGame = (game) => 

@@ -41,6 +41,7 @@ export const getProfile = async (walletAddress?: string): Promise<Profile | null
       
       const profile: Profile = 
       {
+        id: fields.id.id || '',
         name: fields.name || ''
 
       };
