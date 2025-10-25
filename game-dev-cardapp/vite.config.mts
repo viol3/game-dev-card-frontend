@@ -1,16 +1,21 @@
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react-swc";
-import { fileURLToPath } from "url";
-import path from "path";
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import { viteSingleFile } from 'vite-plugin-singlefile'
+import path from 'path'
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
-// https://vitejs.dev/config/
-export default defineConfig({
-  plugins: [react()],
-  resolve: {
+export default defineConfig(
+{
+  base: './', // 👈 önemli
+  resolve: 
+  {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      '@': path.resolve(__dirname, './src'), // 👈 alias tanımı burada
     },
   },
-});
+  plugins: [react(), viteSingleFile()],
+  build: {
+    assetsInlineLimit: 100000000, // 100MB (tüm asset'leri inline et)
+  },
+})
+
+
