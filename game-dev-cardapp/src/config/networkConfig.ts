@@ -8,7 +8,7 @@ const { networkConfig, useNetworkVariable, useNetworkVariables } =
     },
     mainnet: {
       url: getFullnodeUrl("mainnet"),
-    },
+    }
   });
 
 export { networkConfig, useNetworkVariable, useNetworkVariables };

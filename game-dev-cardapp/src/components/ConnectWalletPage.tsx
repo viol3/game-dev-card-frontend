@@ -6,7 +6,8 @@ import { ROUTES, PACKAGE } from '../constants';
 
 
 
-const ConnectWalletPage = () => {
+const ConnectWalletPage = () =>
+{
   const navigate = useNavigate();
   const account = useCurrentAccount();
   const suiClient = useSuiClient();
@@ -132,6 +133,7 @@ const ConnectWalletPage = () => {
           {/* Connect Button */}
           <div className="space-y-4">
             <div className="flex justify-center">
+              
               <ConnectButton
                 connectText="Connect Wallet"
                 className="w-full md:w-auto"
