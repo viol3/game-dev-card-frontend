@@ -90,7 +90,7 @@ const SpaceExplorer = () => {
   const allUsers = useMemo(() => getMockUsers(), []);
 
   // Extract all unique tags from all users (limited to top 15 most common)
-  const allTags = useMemo(() => {
+/*   const allTags = useMemo(() => {
     const tagCount = new Map<string, number>();
     allUsers.forEach((user) => {
       user.games?.forEach((game) => {
@@ -104,7 +104,7 @@ const SpaceExplorer = () => {
       .sort((a, b) => b[1] - a[1])
       .slice(0, 15)
       .map(([tag]) => tag);
-  }, [allUsers]);
+  }, [allUsers]); */
 
   // Filter users based on search criteria
   const filteredUsers = useMemo(() => {
@@ -334,11 +334,11 @@ const SpaceExplorer = () => {
     navigate(`/portfolio/${username}`);
   }, [navigate]);
 
-  const handleTagToggle = useCallback((tag: string) => {
+  /* const handleTagToggle = useCallback((tag: string) => {
     setSelectedTags((prev) =>
       prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
     );
-  }, []);
+  }, []); */
 
   const clearFilters = useCallback(() => {
     setSearchQuery('');
