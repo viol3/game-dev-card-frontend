@@ -1,188 +1,129 @@
-# 🎮 Game Dev Card - Portfolio LinkTree
+# 🎮 Game Dev Card — Frontend (game-dev-cardapp)
 
-A professional, pixel-art themed portfolio platform for game developers to showcase their games and achievements. Built with modern web technologies and a clean, modular architecture.
+Modern, pixel-art themed frontend for the Game Dev Card project. This app provides onboarding, profile creation, a space explorer, and inventory management — and it integrates with a Sponsored Transaction backend (Enoki) for gasless transactions.
 
-## ✨ Features
-
-- **🎨 Pixel Art Theme**: Retro-styled UI with modern animations
-- **🎮 Game Showcase**: Add, edit, and manage your game portfolio
-- **👤 Developer Profiles**: Create personalized developer profiles
-- **🌌 Space Explorer**: Discover other developers and their portfolios
-- **📱 Responsive Design**: Works seamlessly on all devices
-- **⚡ Performance Optimized**: Lazy loading, code splitting, and optimized builds
-- **🔒 Type-Safe**: Full TypeScript support
-- **🎯 Clean Architecture**: Modular service layer with separation of concerns
-
-## 🛠️ Tech Stack
-
-- **Framework**: [React 18](https://react.dev/) with TypeScript
-- **Build Tool**: [Vite 7](https://vitejs.dev/)
-- **Styling**: [Tailwind CSS 3](https://tailwindcss.com/)
-- **UI Components**: [Radix UI](https://www.radix-ui.com/)
-- **Icons**: [Lucide React](https://lucide.dev/)
-- **Routing**: [React Router v6](https://reactrouter.com/)
-- **State Management**: React Hooks + LocalStorage
-- **Code Quality**: ESLint + TypeScript + Prettier
-
-## 📁 Project Structure
-
-```
-src/
-├── components/          # React components
-│   ├── ui/             # Reusable UI components (Radix UI)
-│   ├── LandingPage.jsx
-│   ├── CreateProfilePage.jsx
-│   ├── Dashboard.jsx
-│   ├── PublicPortfolio.jsx
-│   ├── SpaceExplorer.jsx
-│   ├── InventoryPanel.jsx
-│   └── DetailsPanel.jsx
-├── services/           # Business logic & data management
-│   ├── gameService.ts
-│   ├── profileService.ts
-│   └── userService.ts
-├── types/              # TypeScript type definitions
-│   └── index.ts
-├── constants/          # App constants & config
-│   └── index.ts
-├── hooks/              # Custom React hooks
-│   └── use-toast.ts
-├── lib/                # Utility functions
-│   └── utils.ts
-├── App.tsx             # Main app component with routing
-├── main.tsx            # App entry point
-└── index.css           # Global styles & Tailwind config
-```
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-- Node.js 18+ 
-- npm or pnpm
-
-### Installation
-
-1. Clone the repository:
-```bash
-git clone https://github.com/viol3/game-dev-card-frontend.git
-cd game-dev-card-frontend/game-dev-cardapp
-```
-
-2. Install dependencies:
-```bash
-npm install
-# or
-pnpm install
-```
-
-3. Start the development server:
-```bash
-npm run dev
-# or
-pnpm dev
-```
-
-4. Open your browser to `http://localhost:5173`
-
-## 🏗️ Building for Production
-
-```bash
-npm run build
-# or
-pnpm build
-```
-
-The build output will be in the `dist/` directory.
-
-## 🎯 Key Features Explained
-
-### Service Layer Architecture
-
-The app uses a clean service layer pattern to separate business logic from UI:
-
-- **`gameService.ts`**: Handles all game-related operations (CRUD)
-- **`profileService.ts`**: Manages user profile data
-- **`userService.ts`**: Provides mock user data for exploration
-
-### Type Safety
-
-Full TypeScript support with defined interfaces:
-- `Game`: Game entity structure
-- `Profile`: User profile structure
-- `User`: User entity for exploration feature
-
-### Performance Optimizations
-
-- **Lazy Loading**: Routes are lazy-loaded for better initial load time
-- **Code Splitting**: Automatic chunking via Vite
-- **Optimized Images**: External image URLs with proper sizing
-- **Memoization**: Strategic use of React hooks
-
-### Local Storage Persistence
-
-Data is automatically saved to browser localStorage:
-- User profiles
-- Game collections
-- Preferences
-
-## 🎨 Customization
-
-### Tailwind Configuration
-
-The app uses a custom Tailwind configuration with:
-- Dark mode support
-- Custom color palette
-- Pixel-art themed animations
-- Custom gradients
-
-### Adding New Features
-
-1. Create types in `src/types/`
-2. Add business logic to `src/services/`
-3. Create UI components in `src/components/`
-4. Add routes in `src/App.tsx`
-
-## 📝 Code Quality
-
-- **ESLint**: Configured for React + TypeScript
-- **Prettier**: Code formatting (via config)
-- **TypeScript**: Strict type checking
-- **Modular Architecture**: Clean separation of concerns
-
-## 🐛 Troubleshooting
-
-### Port Already in Use
-
-If port 5173 is busy, Vite will automatically use the next available port.
-
-### Build Errors
-
-Make sure all dependencies are installed:
-```bash
-rm -rf node_modules package-lock.json
-npm install
-```
-
-## 📄 License
-
-This project is open source and available under the [MIT License](LICENSE).
-
-## 🤝 Contributing
-
-Contributions, issues, and feature requests are welcome!
-
-## 👤 Author
-
-**viol3**
-- GitHub: [@viol3](https://github.com/viol3)
+This README highlights how to run the app locally and how the Enoki sponsored-transaction flow is wired into the Create Profile flow.
 
 ---
 
-Made with ❤️ for game developers
+## 🎯 Highlights
 
-To build your app for deployment you can run
+- Pixel-art UI powered by Tailwind CSS
+- React + TypeScript (Vite) application
+- Integrates with a Sponsored Transaction backend for gasless UX
+- Clean service layer and reusable UI primitives
+
+---
+
+## 📦 Prerequisites
+
+- Node.js 18+
+- npm (or pnpm)
+
+## 🚀 Local development
+
+1. Install dependencies
 
 ```bash
-pnpm build
+cd game-dev-cardapp
+npm install
+# or pnpm install
 ```
+
+2. Start dev server
+
+```bash
+npm run dev
+# or pnpm dev
+```
+
+Open the app at the localhost URL printed by Vite (default: http://localhost:5173).
+
+3. Build for production
+
+```bash
+npm run build
+# or pnpm build
+```
+
+---
+
+## 🔗 Sponsored transaction integration (Enoki)
+
+This project uses a small backend service (in `../SponsoredTransaction`) to create and execute Enoki-sponsored transactions. The frontend's Create Profile flow demonstrates the integration:
+
+- Create a TransactionBlock client-side and build only the transaction-kind bytes.
+- Send those bytes to the backend `/sponsor` endpoint — backend calls Enoki to create the sponsored transaction and returns the sponsor response (including bytes/digest).
+- The frontend collects the user's signature (wallet) for the sponsored bytes, then posts `digest` + `signature` to backend `/execute` to finalize the transaction.
+
+Where the code lives
+- `src/components/CreateProfilePage.jsx` — the profile creation flow; this file builds a TransactionBlock and calls the local sponsor endpoint.
+- `../SponsoredTransaction` — the small Express backend that calls Enoki (not part of this repo; run separately).
+
+Important notes
+- The frontend sends a `transactionKindBytes` base64 string to the backend. The backend maps that to `transactionBlockKindBytes` for Enoki.
+- If your Enoki project requires zkLogin, the frontend must provide a valid zkLogin JWT. The Create Profile page will look for a token stored in `localStorage` or `sessionStorage` under `zklogin_jwt` and forward it as both a request header (`zklogin-jwt`) and body field (`jwt`).
+
+Security recommendation
+- Do NOT store long-lived secrets in localStorage in production. Prefer an httpOnly cookie or server-side session. See the `SponsoredTransaction` README for backend guidance.
+
+---
+
+## 🧩 Create Profile flow (implementation details)
+
+Relevant code (high-level):
+
+- Build transaction-kind bytes using Sui Transaction API:
+
+```ts
+const tx = new Transaction();
+tx.moveCall({ target: `${PACKAGE.PACKAGEID}::...::create_profile`, arguments: [...] });
+const transactionBlockKindBytes = await tx.build({ client: suiClient, onlyTransactionKind: true });
+const txB64 = toBase64(transactionBlockKindBytes);
+```
+
+- Call sponsor endpoint (CreateProfilePage now forwards zkLogin JWT when present):
+
+```js
+const headers = { 'Content-Type': 'application/json' };
+if (zkJwt) headers['zklogin-jwt'] = zkJwt;
+fetch('http://localhost:3002/sponsor', { method: 'POST', headers, body: JSON.stringify({ transactionKindBytes: txB64, network: 'testnet', jwt: zkJwt }) });
+```
+
+- Wallet signs sponsored bytes (client-side) and posts `digest` + `signature` for execution.
+
+---
+
+## ⚙️ Environment & Config
+
+- No frontend-sensitive env variables are required by default. The backend requires `ENOKI_SECRET_KEY`.
+- If you use zkLogin, configure your Enoki app redirect and obtain the JWT via the chosen flow (server-side exchange or client-side SDK).
+
+---
+
+## 🧪 Testing & debugging tips
+
+- Use the browser DevTools Network tab to inspect `/sponsor` and `/execute` requests and responses.
+- If you see `Invalid JWT`, either remove the zkLogin requirement in Enoki portal (for testing) or ensure you forward a valid `zklogin-jwt` token.
+- Backend logs helpful info; run the SponsoredTransaction backend locally and check its console output.
+
+---
+
+## 🛠️ Contributing
+
+1. Create a feature branch
+2. Add unit tests where applicable
+3. Open a PR explaining the change
+
+---
+
+If you want, I can also:
+- add a small `ZkAuthContext` to keep a JWT in-memory (safer than localStorage), or
+- add example server-side auth/callback endpoints for httpOnly cookie flow.
+
+Tell me which option you prefer and I'll scaffold it.
+
+---
+
+Made with ❤️ by the Game Dev Card team
+
