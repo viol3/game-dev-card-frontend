@@ -6,15 +6,15 @@ export const STORAGE_KEYS =
 
 export const PACKAGE = 
 {
-  PACKAGEID: '0x975c47abc685ac6405eeb94bb643b5da83d424ec87eb665d3dfd23240b2d4424',
-  PROFILETYPE: '0x975c47abc685ac6405eeb94bb643b5da83d424ec87eb665d3dfd23240b2d4424::game_dev_card::GameDevCardProfile',
-  GAMETYPE: '0x975c47abc685ac6405eeb94bb643b5da83d424ec87eb665d3dfd23240b2d4424::game_dev_card::GameItem',
+  PACKAGEID: '0x0a0a934eb20a6e1ba17ac51bc502098bf3d799933ddcc1f60c23f055ec317eb2',
+  PROFILETYPE: '0x0a0a934eb20a6e1ba17ac51bc502098bf3d799933ddcc1f60c23f055ec317eb2::game_dev_card::GameDevCardProfile',
+  GAMETYPE: '0x0a0a934eb20a6e1ba17ac51bc502098bf3d799933ddcc1f60c23f055ec317eb2::game_dev_card::GameItem',
   MODULENAME: 'game_dev_card',
   CREATEPROFILEFUNC: 'create_game_dev_profile',
   ADDGAMEFUNC: 'add_game',
   UPDATEGAMEFUNC: 'update_game',
   DELETEGAMEFUNC: 'remove_game',
-  DONKEYSADDLE: '0x67a472febf1820277d68e96bd462a0bd050273bb5c5d9f157df0ecf6d526ae02'
+  DONKEYSADDLE: '0x15e65e4952d73e8b1eef431cdc72e570212da102bfb5581e3099dd49b9196427'
 } as const;
 
 export const ROUTES = {
