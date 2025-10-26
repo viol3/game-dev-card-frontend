@@ -99,7 +99,7 @@ const DetailsPanel = ({ game, isAddingNew, onSave, onCancel }) => {
     setIsSubmitting(true);
 
     try {
-      // Transaction oluştur
+      // Create transaction
       const tx = new Transaction();
       
       tx.moveCall(
@@ -116,7 +116,7 @@ const DetailsPanel = ({ game, isAddingNew, onSave, onCancel }) => {
         ],
       });
 
-      // Transaction'ı imzala ve gönder
+      // Sign and execute transaction
       signAndExecute(
         {
           transaction: tx,
@@ -131,7 +131,6 @@ const DetailsPanel = ({ game, isAddingNew, onSave, onCancel }) => {
               description: `${formData.name} has been updated on your portfolio.`,
             });
 
-            // Form'u temizle
             setFormData(
             {
               name: '',
@@ -141,7 +140,6 @@ const DetailsPanel = ({ game, isAddingNew, onSave, onCancel }) => {
               platform: '',
             });
 
-            // Parent component'e bildir (varsa)
             if (onSave) {
               onSave(formData);
             }
@@ -196,7 +194,7 @@ const DetailsPanel = ({ game, isAddingNew, onSave, onCancel }) => {
     setIsSubmitting(true);
 
     try {
-      // Transaction oluştur
+      // Create transaction
       const tx = new Transaction();
       
       tx.moveCall(
@@ -212,7 +210,7 @@ const DetailsPanel = ({ game, isAddingNew, onSave, onCancel }) => {
         ],
       });
 
-      // Transaction'ı imzala ve gönder
+      // Sign and execute transaction
       signAndExecute(
         {
           transaction: tx,
@@ -227,7 +225,6 @@ const DetailsPanel = ({ game, isAddingNew, onSave, onCancel }) => {
               description: `${formData.name} has been added to your portfolio.`,
             });
 
-            // Form'u temizle
             setFormData(
             {
               name: '',
@@ -237,7 +234,6 @@ const DetailsPanel = ({ game, isAddingNew, onSave, onCancel }) => {
               platform: '',
             });
 
-            // Parent component'e bildir (varsa)
             if (onSave) {
               onSave(formData);
             }

@@ -44,18 +44,14 @@ return (
 	{/* Main content */}
 	<div className={`relative z-10 flex flex-col items-center justify-center min-h-screen px-4 ${address ? 'pt-20' : ''}`}>
 		<div className="text-center space-y-8 max-w-4xl">
-		{/* Title with pixel border effect */}
-		<div className="relative inline-block">
-			<div className="absolute -inset-2 bg-gradient-to-r from-cyan-400 via-pink-500 to-yellow-400 opacity-75 blur-xl animate-pulse" />
-			<h1 className="relative text-6xl md:text-8xl font-bold pixel-text text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-pink-300 to-yellow-300 drop-shadow-[0_0_30px_rgba(0,217,255,0.5)]">
-			GAME DEV
-			</h1>
-		</div>
-		
-		<div className="relative inline-block mt-4">
-			<h2 className="text-4xl md:text-5xl font-bold pixel-text text-green-400 drop-shadow-[0_0_20px_rgba(0,255,135,0.6)]">
-			LINK TREE
-			</h2>
+		{/* Logo */}
+		<div className="relative inline-block mb-8">
+			<div className="absolute -inset-4 bg-gradient-to-r from-cyan-400 via-pink-500 to-yellow-400 opacity-75 blur-2xl animate-pulse" />
+			<img 
+			src="/logo.png" 
+			alt="GameDev Cards Logo" 
+			className="relative w-48 h-48 md:w-64 md:h-64 object-contain mx-auto drop-shadow-[0_0_40px_rgba(0,217,255,0.6)]"
+			/>
 		</div>
 
 		<p className="text-xl md:text-2xl text-cyan-200 font-mono max-w-2xl mx-auto leading-relaxed mt-8">

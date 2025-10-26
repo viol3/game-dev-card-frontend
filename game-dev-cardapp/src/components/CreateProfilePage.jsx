@@ -22,14 +22,14 @@ const CreateProfilePage = () =>
   const account = useCurrentAccount();
   const { mutate: signAndExecute } = useSignAndExecuteTransaction();
 
-  // Kullanıcı adı validasyon fonksiyonu
+  // Username validation function
   const validateUsername = (username) => {
-    // Boş kontrol
+    // Empty check
     if (!username.trim()) {
       return 'Username cannot be empty';
     }
 
-    // Uzunluk kontrolü (3-20 karakter)
+    // Length check (3-20 characters)
     if (username.length < 3) {
       return 'Username must be at least 3 characters';
     }
@@ -37,40 +37,40 @@ const CreateProfilePage = () =>
       return 'Username must be at most 20 characters';
     }
 
-    // Büyük harf kontrolü
+    // Uppercase check
     if (/[A-Z]/.test(username)) {
       return 'Username must be lowercase only';
     }
 
-    // Sadece küçük harf, rakam, alt çizgi ve tire izin ver
+    // Only lowercase letters, numbers, underscore and hyphen allowed
     const usernameRegex = /^[a-z0-9_-]+$/;
     if (!usernameRegex.test(username)) {
       return 'Username can only contain lowercase letters, numbers, underscore (_) and hyphen (-)';
     }
 
-    // Harf veya rakamla başlamalı (özel karakter ile başlamamalı)
+    // Must start with letter or number (no special characters)
     if (!/^[a-z0-9]/.test(username)) {
       return 'Username must start with a letter or number';
     }
 
-    // Harf veya rakamla bitmeli (özel karakter ile bitmemeli)
+    // Must end with letter or number (no special characters)
     if (!/[a-z0-9]$/.test(username)) {
       return 'Username must end with a letter or number';
     }
 
-    // Ardışık özel karakterler olmamalı
+    // No consecutive special characters
     if (/[_-]{2,}/.test(username)) {
       return 'Username cannot have consecutive special characters';
     }
 
-    return null; // Geçerli
+    return null; // Valid
   };
 
-  // Input değişikliğini handle et
+  // Handle input change
   const handleNameChange = (e) => {
     let value = e.target.value;
     
-    // Büyük harfleri otomatik olarak küçük harfe çevir
+    // Automatically convert uppercase to lowercase
     value = value.toLowerCase();
     
     setCharacterName(value);
@@ -130,7 +130,7 @@ const CreateProfilePage = () =>
     setIsCreating(true);
 
     try {
-      // Transaction oluştur
+      // Create transaction
       const tx = new Transaction();
       
       tx.moveCall({
@@ -141,7 +141,7 @@ const CreateProfilePage = () =>
         ],
       });
 
-      // Transaction'ı imzala ve gönder
+      // Sign and execute transaction
       signAndExecute(
         {
           transaction: tx,
@@ -156,7 +156,7 @@ const CreateProfilePage = () =>
               description: `Welcome, ${characterName}! Your quest begins now.`,
             });
 
-            // Dashboard'a yönlendir
+            // Redirect to dashboard
             setTimeout(() => 
             {
               navigate('/dashboard');

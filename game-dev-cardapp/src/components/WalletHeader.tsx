@@ -48,9 +48,11 @@ const WalletHeader = ({ showBackButton = false, onBack }: WalletHeaderProps) => 
               ← Back
             </Button>
           ) : (
-            <div className="text-2xl font-bold pixel-text text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-pink-500">
-              GameDev Cards
-            </div>
+            <img 
+              src="/logo.png" 
+              alt="GameDev Cards Logo" 
+              className="w-12 h-12 object-contain"
+            />
           )}
         </div>
 

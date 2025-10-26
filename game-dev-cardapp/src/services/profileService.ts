@@ -33,7 +33,7 @@ export const getProfile = async (walletAddress?: string): Promise<Profile | null
       return null;
     }
 
-    // İlk profile objesini al
+    // Get first profile object
     const profileData = ownedObjects.data[0];
     
     if (profileData.data?.content && 'fields' in profileData.data.content) {
@@ -46,7 +46,7 @@ export const getProfile = async (walletAddress?: string): Promise<Profile | null
 
       };
 
-      // Blockchain'den alınan profili localStorage'a kaydet
+      // Save profile from blockchain to localStorage
       localStorage.setItem(
         `${STORAGE_KEYS.PROFILE}_${walletAddress}`,
         JSON.stringify(profile)
@@ -112,7 +112,7 @@ export const getProfileIdFromUsername = async (username: string): Promise<string
     let hasNextPage = true;
     let cursor = null;
 
-    // Tüm dynamic field'ları paginate ederek ara
+    // Search all dynamic fields with pagination
     while (hasNextPage) 
     {
       const response = await client.getDynamicFields({
@@ -121,7 +121,6 @@ export const getProfileIdFromUsername = async (username: string): Promise<string
         limit: 50
       });
 
-      // Username'i ara
       const found = response.data.find(
         field => field.name.value === username
       );  

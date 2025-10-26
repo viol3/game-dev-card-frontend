@@ -5,16 +5,16 @@ import path from 'path'
 
 export default defineConfig(
 {
-  base: './', // 👈 önemli
+  base: './', // important
   resolve: 
   {
     alias: {
-      '@': path.resolve(__dirname, './src'), // 👈 alias tanımı burada
+      '@': path.resolve(__dirname, './src'), // alias definition
     },
   },
   plugins: [react(), viteSingleFile()],
   build: {
-    assetsInlineLimit: 100000000, // 100MB (tüm asset'leri inline et)
+    assetsInlineLimit: 100000000, // 100MB (inline all assets)
   },
 })
 

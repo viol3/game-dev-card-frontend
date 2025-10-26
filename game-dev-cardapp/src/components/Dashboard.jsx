@@ -9,8 +9,7 @@ import { useWallet } from '../contexts/WalletContext';
 import InventoryPanel from './InventoryPanel';
 import DetailsPanel from './DetailsPanel';
 import SpaceExplorer from './SpaceExplorer';
-import WalletHeader from './WalletHeader';
-import { Share2, User, Rocket, Gamepad2 } from 'lucide-react';
+import { Share2, User, Rocket, Gamepad2, Wallet, Copy, Check, LogOut } from 'lucide-react';
 import { PACKAGE } from '../constants';
 import { useCurrentAccount, useSignAndExecuteTransaction, useSuiClient } from '@mysten/dapp-kit';
 import { Transaction } from '@mysten/sui/transactions';
@@ -21,6 +20,7 @@ const Dashboard = () => {
   const [games, setGames] = useState([]);
   const [selectedGame, setSelectedGame] = useState(null);
   const [isAddingNew, setIsAddingNew] = useState(false);
+  const [copiedAddress, setCopiedAddress] = useState(false);
   const navigate = useNavigate();
   const { address, disconnect } = useWallet();
   const account = useCurrentAccount();
@@ -43,10 +43,27 @@ const Dashboard = () => {
       }
       setProfile(savedProfile);
       const fetchedGames = await getGames(address);
-      setGames([...fetchedGames]); // Yeni array referansı oluştur
+      setGames([...fetchedGames]); // Create new array reference
     }
     checkSavedProfile();
   }, [navigate, address]);
+
+  const handleCopyAddress = () => {
+    if (address) {
+      navigator.clipboard.writeText(address);
+      setCopiedAddress(true);
+      setTimeout(() => setCopiedAddress(false), 2000);
+    }
+  };
+
+  const handleDisconnect = () => {
+    disconnect();
+    navigate('/');
+  };
+
+  const truncateAddress = (addr) => {
+    return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
+  };
 
   const handleAddGame = () => {
     setIsAddingNew(true);
@@ -63,9 +80,9 @@ const Dashboard = () => {
         // Update existing game
         const updated = await updateGame(selectedGame.id, gameData, address);
         
-        // Oyunları yeniden çek ve state'i güncelle
+        // Refetch games and update state
         const updatedGames = await getGames(address);
-        setGames([...updatedGames]); // Yeni array referansı oluştur
+        setGames([...updatedGames]); // Create new array reference
         setSelectedGame(updated);
         
         toast({
@@ -78,9 +95,9 @@ const Dashboard = () => {
         // Add new game
         const newGame = await addGame(gameData, address);
         
-        // Oyunları yeniden çek ve state'i güncelle
+        // Refetch games and update state
         const updatedGames = await getGames(address);
-        setGames([...updatedGames]); // Yeni array referansı oluştur
+        setGames([...updatedGames]); // Create new array reference
         setSelectedGame(newGame);
         
         toast(
@@ -107,7 +124,7 @@ const Dashboard = () => {
     if (!address) return;
     
     try {
-      // Transaction oluştur
+      // Create transaction
       const tx = new Transaction();
       
       tx.moveCall(
@@ -120,7 +137,7 @@ const Dashboard = () => {
         ],
       });
 
-      // Transaction'ı imzala ve gönder
+      // Sign and execute transaction
       signAndExecute(
         {
           transaction: tx,
@@ -130,16 +147,16 @@ const Dashboard = () => {
           {
             console.log('Game deleted successfully:', result);
             
-            // Seçili oyun siliniyorsa seçimi temizle
+            // Clear selection if the deleted game was selected
             if (selectedGame?.id === id) 
             {
               setSelectedGame(null);
             }
             
-            // Oyunları yeniden çek ve state'i güncelle
+            // Refetch games and update state
             try {
               const updatedGames = await getGames(address);
-              setGames([...updatedGames]); // Yeni array referansı oluştur
+              setGames([...updatedGames]); // Create new array reference
               console.log("Games updated after deletion, count:", updatedGames.length);
             } catch (error) {
               console.error('Error refreshing games:', error);
@@ -199,13 +216,16 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      {/* Wallet Header */}
-      <WalletHeader />
-      
       {/* Profile Header */}
-      <div className="bg-slate-800/80 border-b-4 border-cyan-500 backdrop-blur-sm mt-16">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+      <div className="bg-slate-800/80 border-b-4 border-cyan-500 backdrop-blur-sm">
+        <div className="w-full px-4 py-4 flex items-center justify-between">
+          {/* Left side - Logo + User Info + Share Button */}
           <div className="flex items-center gap-4">
+            <img 
+              src="/logo.png" 
+              alt="GameDev Cards Logo" 
+              className="w-12 h-12 object-contain"
+            />
             <div className="w-12 h-12 bg-gradient-to-br from-cyan-500 to-pink-500 rounded-lg flex items-center justify-center">
               <User className="w-8 h-8 text-white" />
             </div>
@@ -213,15 +233,57 @@ const Dashboard = () => {
               <h1 className="text-2xl font-bold pixel-text text-yellow-300">{profile.name}</h1>
               <p className="text-sm font-mono text-cyan-300">Level {games.length + 1} Developer</p>
             </div>
-          </div>
-          
-          <div className="flex items-center gap-3">
             <Button
               onClick={handleShare}
               className="pixel-button bg-green-600 hover:bg-green-500 text-white border-2 border-green-400 font-mono"
             >
               <Share2 className="w-4 h-4 mr-2" />
               SHARE
+            </Button>
+          </div>
+          
+          {/* Right side - Wallet info and disconnect */}
+          <div className="flex items-center gap-3">
+            {/* Wallet Address */}
+            <div className="hidden sm:flex items-center gap-2 bg-slate-800 border-2 border-cyan-500 px-3 py-2 rounded-lg">
+              <Wallet className="w-4 h-4 text-cyan-400" />
+              <span className="font-mono text-sm text-cyan-300">
+                {truncateAddress(address)}
+              </span>
+              <button
+                onClick={handleCopyAddress}
+                className="ml-1 p-1 hover:bg-slate-700 rounded transition-colors"
+                title="Copy address"
+              >
+                {copiedAddress ? (
+                  <Check className="w-4 h-4 text-green-400" />
+                ) : (
+                  <Copy className="w-4 h-4 text-slate-400 hover:text-cyan-400" />
+                )}
+              </button>
+            </div>
+
+            {/* Mobile wallet indicator */}
+            <div className="sm:hidden">
+              <Button
+                onClick={handleCopyAddress}
+                variant="outline"
+                size="sm"
+                className="border-cyan-500 text-cyan-400"
+              >
+                <Wallet className="w-4 h-4" />
+              </Button>
+            </div>
+
+            {/* Disconnect Button */}
+            <Button
+              onClick={handleDisconnect}
+              variant="outline"
+              size="sm"
+              className="border-red-500 text-red-400 hover:bg-red-500/10 hover:text-red-300 font-mono"
+            >
+              <LogOut className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">LOGOUT</span>
             </Button>
           </div>
         </div>

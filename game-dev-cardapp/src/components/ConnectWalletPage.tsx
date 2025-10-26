@@ -34,7 +34,7 @@ const ConnectWalletPage = () =>
           },
         });
 
-        // Eğer profile varsa DASHBOARD'a, yoksa HOME'a yönlendir
+        // If profile exists, redirect to DASHBOARD, otherwise to HOME
         if (ownedObjects.data.length > 0) 
         {
           console.log('Profile bulundu, DASHBOARD\'a yönlendiriliyor...');
@@ -49,7 +49,7 @@ const ConnectWalletPage = () =>
       catch (error) 
       {
         console.error('Profile kontrolü başarısız:', error);
-        // Hata durumunda HOME'a yönlendir
+        // On error, redirect to HOME
         navigate(ROUTES.HOME);
       } 
       finally 
@@ -57,7 +57,7 @@ const ConnectWalletPage = () =>
 
       }
     };
-    // Wallet bağlandığında home sayfasına yönlendir
+    // When wallet is connected, redirect to home page
     if (account) 
     {
       checkProfileAndNavigate();
@@ -99,8 +99,12 @@ const ConnectWalletPage = () =>
         <div className="bg-slate-800/50 backdrop-blur-xl border-4 border-slate-700 rounded-lg p-8 md:p-12 shadow-2xl">
           {/* Header */}
           <div className="text-center space-y-6 mb-8">
-            <div className="inline-block p-4 bg-gradient-to-br from-cyan-500/20 to-purple-500/20 rounded-full border-2 border-cyan-400/50">
-              <Wallet className="w-16 h-16 text-cyan-400" />
+            <div className="inline-block">
+              <img 
+                src="/logo.png" 
+                alt="GameDev Cards Logo" 
+                className="w-32 h-32 object-contain mx-auto"
+              />
             </div>
             
             <h1 className="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-purple-300 to-pink-300">

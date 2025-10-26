@@ -10,7 +10,7 @@ type Toast = {
   description?: string;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
-  [key: string]: any; // esnek ek özellikler
+  [key: string]: any; // flexible additional properties
 };
 
 type ToastState = {
