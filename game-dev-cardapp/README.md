@@ -1,4 +1,4 @@
-# 🎮 Game Dev Card — Frontend (game-dev-cardapp)
+# 🎮 Cosgame.fun - Game Dev Card-App
 
 Modern, pixel-art themed frontend for the Game Dev Card project. This app provides onboarding, profile creation, a space explorer, and inventory management — and it integrates with a Sponsored Transaction backend (Enoki) for gasless transactions.
 
