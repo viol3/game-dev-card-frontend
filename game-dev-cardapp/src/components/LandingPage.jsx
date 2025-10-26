@@ -2,12 +2,18 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
 import { Gamepad2, Sword, Trophy, Zap } from 'lucide-react';
+import WalletHeader from './WalletHeader';
+import { useWallet } from '../contexts/WalletContext';
 
 const LandingPage = () => {
 const navigate = useNavigate();
+const { address } = useWallet();
 
 return (
 	<div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
+	{/* Wallet Header - only show if user is logged in */}
+	{address && <WalletHeader />}
+	
 	{/* Animated pixel grid background */}
 	<div className="absolute inset-0 opacity-10">
 		<div className="grid grid-cols-20 grid-rows-20 h-full w-full">
@@ -36,7 +42,7 @@ return (
 	</div>
 
 	{/* Main content */}
-	<div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4">
+	<div className={`relative z-10 flex flex-col items-center justify-center min-h-screen px-4 ${address ? 'pt-20' : ''}`}>
 		<div className="text-center space-y-8 max-w-4xl">
 		{/* Title with pixel border effect */}
 		<div className="relative inline-block">

@@ -5,6 +5,7 @@ export interface Game {
   description: string;
   image: string;
   platform: string;
+  tags?: string[];
 }
 
 export interface Profile 
@@ -32,4 +33,5 @@ export interface User {
   bio: string;
   gameCount: number;
   level: number;
+  games?: Game[];
 }

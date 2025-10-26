@@ -10,28 +10,95 @@ import { useWallet } from '../contexts/WalletContext';
 import { User, ArrowRight, Sparkles } from 'lucide-react';
 import { toast } from '../hooks/use-toast';
 import { PACKAGE } from '../constants';
+import WalletHeader from './WalletHeader';
 
 const CreateProfilePage = () => 
 {
   const [characterName, setCharacterName] = useState('');
   const [isCreating, setIsCreating] = useState(false);
+  const [validationError, setValidationError] = useState('');
   const navigate = useNavigate();
   const { address } = useWallet();
   const account = useCurrentAccount();
   const { mutate: signAndExecute } = useSignAndExecuteTransaction();
 
+  // Kullanıcı adı validasyon fonksiyonu
+  const validateUsername = (username) => {
+    // Boş kontrol
+    if (!username.trim()) {
+      return 'Username cannot be empty';
+    }
+
+    // Uzunluk kontrolü (3-20 karakter)
+    if (username.length < 3) {
+      return 'Username must be at least 3 characters';
+    }
+    if (username.length > 20) {
+      return 'Username must be at most 20 characters';
+    }
+
+    // Büyük harf kontrolü
+    if (/[A-Z]/.test(username)) {
+      return 'Username must be lowercase only';
+    }
+
+    // Sadece küçük harf, rakam, alt çizgi ve tire izin ver
+    const usernameRegex = /^[a-z0-9_-]+$/;
+    if (!usernameRegex.test(username)) {
+      return 'Username can only contain lowercase letters, numbers, underscore (_) and hyphen (-)';
+    }
+
+    // Harf veya rakamla başlamalı (özel karakter ile başlamamalı)
+    if (!/^[a-z0-9]/.test(username)) {
+      return 'Username must start with a letter or number';
+    }
+
+    // Harf veya rakamla bitmeli (özel karakter ile bitmemeli)
+    if (!/[a-z0-9]$/.test(username)) {
+      return 'Username must end with a letter or number';
+    }
+
+    // Ardışık özel karakterler olmamalı
+    if (/[_-]{2,}/.test(username)) {
+      return 'Username cannot have consecutive special characters';
+    }
+
+    return null; // Geçerli
+  };
+
+  // Input değişikliğini handle et
+  const handleNameChange = (e) => {
+    let value = e.target.value;
+    
+    // Büyük harfleri otomatik olarak küçük harfe çevir
+    value = value.toLowerCase();
+    
+    setCharacterName(value);
+    
+    // Real-time validasyon
+    if (value) {
+      const error = validateUsername(value);
+      setValidationError(error || '');
+    } else {
+      setValidationError('');
+    }
+  };
+
   const handleSubmit = async (e) => 
     {
     e.preventDefault();
     
-    if (!characterName.trim()) 
+    // Final validasyon
+    const validationResult = validateUsername(characterName);
+    if (validationResult) 
     {
       toast(
       {
-        title: 'Character Creation Failed!',
-        description: 'Please enter a character name to continue.',
+        title: 'Invalid Username!',
+        description: validationResult,
         variant: 'destructive',
       });
+      setValidationError(validationResult);
       return;
     }
 
@@ -112,22 +179,27 @@ const CreateProfilePage = () =>
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-900 relative overflow-hidden flex items-center justify-center p-4">
-      {/* Animated background particles */}
-      <div className="absolute inset-0 overflow-hidden">
-        {[...Array(30)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute w-2 h-2 bg-cyan-400 opacity-50 animate-ping"
-            style={{
-              top: `${Math.random() * 100}%`,
-              left: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 3}s`,
-              animationDuration: `${2 + Math.random() * 2}s`,
-            }}
-          />
-        ))}
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-900 relative overflow-hidden">
+      {/* Wallet Header */}
+      <WalletHeader />
+      
+      {/* Main Content */}
+      <div className="flex items-center justify-center p-4 pt-24">
+        {/* Animated background particles */}
+        <div className="absolute inset-0 overflow-hidden">
+          {[...Array(30)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-2 h-2 bg-cyan-400 opacity-50 animate-ping"
+              style={{
+                top: `${Math.random() * 100}%`,
+                left: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 3}s`,
+                animationDuration: `${2 + Math.random() * 2}s`,
+              }}
+            />
+          ))}
+        </div>
 
       {/* Main form container */}
       <div className="relative z-10 w-full max-w-xl">
@@ -159,14 +231,38 @@ const CreateProfilePage = () =>
                 id="characterName"
                 type="text"
                 value={characterName}
-                onChange={(e) => setCharacterName(e.target.value)}
-                placeholder="Enter your awesome name..."
-                className="pixel-input text-xl p-6 bg-slate-900 border-4 border-cyan-500 text-white placeholder:text-slate-500 focus:border-pink-500 transition-colors font-mono"
-                maxLength={30}
+                onChange={handleNameChange}
+                placeholder="awesome_gamer123"
+                className={`pixel-input text-xl p-6 bg-slate-900 border-4 ${
+                  validationError 
+                    ? 'border-red-500 focus:border-red-400' 
+                    : characterName && !validationError
+                    ? 'border-green-500 focus:border-green-400'
+                    : 'border-cyan-500 focus:border-pink-500'
+                } text-white placeholder:text-slate-500 transition-colors font-mono`}
+                maxLength={20}
+                disabled={isCreating}
               />
-              <p className="text-sm text-slate-400 font-mono">
-                {characterName.length}/30 characters
-              </p>
+              <div className="space-y-1">
+                {validationError ? (
+                  <p className="text-sm text-red-400 font-mono flex items-center gap-2">
+                    <span>❌</span> {validationError}
+                  </p>
+                ) : characterName ? (
+                  <p className="text-sm text-green-400 font-mono flex items-center gap-2">
+                    <span>✓</span> Username is valid!
+                  </p>
+                ) : null}
+                <p className="text-sm text-slate-400 font-mono">
+                  {characterName.length}/20 characters
+                </p>
+                <div className="text-xs text-slate-500 font-mono space-y-1 mt-2">
+                  <p>• 3-20 characters</p>
+                  <p>• Only lowercase letters, numbers, underscore (_), hyphen (-)</p>
+                  <p>• Must start and end with letter or number</p>
+                  <p>• No consecutive special characters</p>
+                </div>
+              </div>
             </div>
 
             {/* <div className="space-y-3">
@@ -195,15 +291,25 @@ const CreateProfilePage = () =>
                 onClick={() => navigate('/home')}
                 variant="outline"
                 className="flex-1 pixel-button text-lg py-6 border-4 border-slate-500 bg-slate-700 hover:bg-slate-600 text-white font-mono"
+                disabled={isCreating}
               >
                 BACK
               </Button>
               <Button
                 type="submit"
-                className="flex-1 pixel-button text-lg py-6 bg-gradient-to-r from-cyan-500 to-pink-500 hover:from-cyan-400 hover:to-pink-400 text-white border-4 border-white shadow-[0_6px_0_rgba(0,0,0,0.3)] hover:shadow-[0_3px_0_rgba(0,0,0,0.3)] active:shadow-[0_1px_0_rgba(0,0,0,0.3)] hover:-translate-y-1 active:translate-y-1 transition-all duration-150 font-bold"
+                disabled={isCreating || !characterName || !!validationError}
+                className="flex-1 pixel-button text-lg py-6 bg-gradient-to-r from-cyan-500 to-pink-500 hover:from-cyan-400 hover:to-pink-400 text-white border-4 border-white shadow-[0_6px_0_rgba(0,0,0,0.3)] hover:shadow-[0_3px_0_rgba(0,0,0,0.3)] active:shadow-[0_1px_0_rgba(0,0,0,0.3)] hover:-translate-y-1 active:translate-y-1 transition-all duration-150 font-bold disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
               >
-                START QUEST
-                <ArrowRight className="ml-2 w-5 h-5" />
+                {isCreating ? (
+                  <>
+                    <span className="animate-pulse">CREATING...</span>
+                  </>
+                ) : (
+                  <>
+                    START QUEST
+                    <ArrowRight className="ml-2 w-5 h-5" />
+                  </>
+                )}
               </Button>
             </div>
           </form>
@@ -222,6 +328,7 @@ const CreateProfilePage = () =>
             ))}
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

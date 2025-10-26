@@ -9,5 +9,5 @@ export const getMockUsers = (): User[] => {
     id: `user-${index}`,
     username: user.name.toLowerCase().replace(/[^a-z0-9]/g, '-'),
     ...user,
-  }));
+  })) as unknown as User[];
 };

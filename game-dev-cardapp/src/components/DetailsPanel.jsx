@@ -278,7 +278,7 @@ const DetailsPanel = ({ game, isAddingNew, onSave, onCancel }) => {
       <div className="bg-slate-800/80 border-4 border-pink-500 pixel-border backdrop-blur-sm h-[calc(100vh-200px)] flex items-center justify-center">
         <div className="text-center p-12">
           <div className="text-8xl mb-6 animate-bounce">📜</div>
-          <h3 className="text-3xl font-bold pixel-text text-pink-300 mb-4">CHARACTER SHEET</h3>
+          <h3 className="text-3xl font-bold pixel-text text-pink-300 mb-4">GAME SHEET</h3>
           <p className="text-lg font-mono text-slate-400">Select a game from your inventory</p>
           <p className="text-lg font-mono text-slate-400">or add a new one to get started!</p>
         </div>
@@ -408,7 +408,7 @@ const DetailsPanel = ({ game, isAddingNew, onSave, onCancel }) => {
               className="flex-1 pixel-button bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-400 text-white border-4 border-green-400 py-6 text-lg font-bold shadow-[0_6px_0_rgba(0,0,0,0.3)] hover:shadow-[0_3px_0_rgba(0,0,0,0.3)] active:shadow-[0_1px_0_rgba(0,0,0,0.3)] hover:-translate-y-1 active:translate-y-1 transition-all duration-150"
             >
               <Save className="w-5 h-5 mr-2" />
-              SAVE GAME
+              {isAddingNew ? 'SAVE GAME' : 'UPDATE GAME'}
             </Button>
           </div>
         </form>

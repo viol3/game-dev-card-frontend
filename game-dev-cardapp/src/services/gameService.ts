@@ -134,7 +134,11 @@ export const getWalletAddressByProfileId = async (profileId: string): Promise<st
         }
     });
     console.log(object.data)
-    return object.data?.owner?.AddressOwner || "";
+    const owner = object.data?.owner;
+    if (owner && typeof owner === 'object' && 'AddressOwner' in owner) {
+      return owner.AddressOwner as string;
+    }
+    return "";
   } 
   catch (error) 
   {

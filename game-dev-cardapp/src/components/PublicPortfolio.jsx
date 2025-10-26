@@ -4,6 +4,8 @@ import { Button } from './ui/button';
 import { getProfile } from '../services/profileService';
 import { getGames, getWalletAddressByProfileId, getProfileIdFromUsername } from '../services/gameService';
 import { ExternalLink, ArrowLeft, Gamepad2, Calendar, Tag } from 'lucide-react';
+import WalletHeader from './WalletHeader';
+import { useWallet } from '../contexts/WalletContext';
 
 const PublicPortfolio = () => 
   {
@@ -12,6 +14,7 @@ const PublicPortfolio = () =>
   const navigate = useNavigate();
   const [profile, setProfile] = useState(false);
   const [games, setGames] = useState([]);
+  const { address } = useWallet();
 
   useEffect( () => 
   {
@@ -73,8 +76,11 @@ const PublicPortfolio = () =>
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-900">
+      {/* Wallet Header - only show if user is logged in */}
+      {address && <WalletHeader showBackButton onBack={() => navigate('/dashboard')} />}
+      
       {/* Hero Section */}
-      <div className="relative overflow-hidden">
+      <div className={`relative overflow-hidden ${address ? 'pt-20' : ''}`}>
         {/* Animated background */}
         <div className="absolute inset-0 opacity-20">
           {[...Array(50)].map((_, i) => (

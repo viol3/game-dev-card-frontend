@@ -67,3 +67,24 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Galaxy View Animations - Optimized */
+@keyframes twinkle {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+.star {
+  position: absolute;
+  background: white;
+  border-radius: 50%;
+  animation: twinkle var(--duration) ease-in-out infinite;
+  animation-delay: var(--delay);
+  will-change: opacity, transform;
+}
+

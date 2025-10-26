@@ -1,9 +1,18 @@
-import React from 'react';
 import { Button } from './ui/button';
 import { Plus, Trash2, ExternalLink } from 'lucide-react';
 import { ScrollArea } from './ui/scroll-area';
+import type { Game } from '../types';
 
-const InventoryPanel = ({ games, selectedGame, onSelectGame, onAddGame, onDeleteGame }) => {
+interface InventoryPanelProps
+{
+  games: Game[];
+  selectedGame: Game | null;
+  onSelectGame: (game: Game) => void;
+  onAddGame: () => void;
+  onDeleteGame: (id: string) => void;
+}
+
+const InventoryPanel = ({ games, selectedGame, onSelectGame, onAddGame, onDeleteGame }: InventoryPanelProps) => {
   return (
     <div className="bg-slate-800/80 border-4 border-cyan-500 pixel-border backdrop-blur-sm h-[calc(100vh-200px)]">
       {/* Header */}
