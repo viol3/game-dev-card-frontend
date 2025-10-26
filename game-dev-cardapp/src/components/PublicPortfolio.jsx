@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
-import { getProfile } from '../services/profileService';
-import { getGames, getWalletAddressByProfileId, getProfileIdFromUsername } from '../services/gameService';
+import { getProfile, getProfileIdFromUsername, getWalletAddressByProfileId } from '../services/profileService';
+import { getGames  } from '../services/gameService';
 import { ExternalLink, ArrowLeft, Gamepad2, Calendar, Tag } from 'lucide-react';
 import WalletHeader from './WalletHeader';
 import { useWallet } from '../contexts/WalletContext';

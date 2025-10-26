@@ -5,7 +5,7 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { useCurrentAccount, useSignAndExecuteTransaction } from '@mysten/dapp-kit';
 import { Transaction } from '@mysten/sui/transactions';
-import { saveProfile, generateUsername } from '../services/profileService';
+import { saveProfile, generateUsername, getProfileIdFromUsername } from '../services/profileService';
 import { useWallet } from '../contexts/WalletContext';
 import { User, ArrowRight, Sparkles } from 'lucide-react';
 import { toast } from '../hooks/use-toast';
@@ -101,6 +101,20 @@ const CreateProfilePage = () =>
       setValidationError(validationResult);
       return;
     }
+
+    const profileId = await getProfileIdFromUsername(characterName);
+    console.log("Checking profile ID for username => " + characterName + " : " + profileId);
+    if(profileId != "")
+    {
+      toast(
+      {
+        title: 'Username already taken!',
+        description: "This username is already in use. Please choose another one.",
+        variant: 'destructive',
+      });
+      return;
+    }
+    
 
     if (!address) 
     {

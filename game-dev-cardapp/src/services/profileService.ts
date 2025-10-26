@@ -104,3 +104,93 @@ export const deleteProfile = (walletAddress: string): void => {
 export const generateUsername = (name: string): string => {
   return name.toLowerCase().replace(/[^a-z0-9]/g, '-');
 };
+
+export const getProfileIdFromUsername = async (username: string): Promise<string> =>
+{
+  const client = new SuiClient({ url: getFullnodeUrl('testnet') });
+  try {
+    let hasNextPage = true;
+    let cursor = null;
+
+    // Tüm dynamic field'ları paginate ederek ara
+    while (hasNextPage) 
+    {
+      const response = await client.getDynamicFields({
+        parentId: PACKAGE.DONKEYSADDLE,
+        cursor: cursor,
+        limit: 50
+      });
+
+      // Username'i ara
+      const found = response.data.find(
+        field => field.name.value === username
+      );  
+
+      if (found) 
+      {
+        console.log(`Found user "${username}":`, found.objectId);
+        const object = await client.getObject(
+        {
+          id: found.objectId,
+          options: 
+          {
+            showContent: true
+          }
+        });
+
+        if (object.data?.content?.dataType === 'moveObject') 
+          {
+          const fields = object.data.content.fields as any;
+          console.log(fields)
+          return fields.value || "";
+        }
+
+        return "";
+        
+      }
+
+      hasNextPage = response.hasNextPage;
+      cursor = response.nextCursor;
+    }
+
+    console.log(`User "${username}" not found`);
+    return "";
+    
+  } 
+  catch (error) 
+  {
+    console.error('Error searching for user:', error);
+    throw error;
+  }
+}
+
+export const getWalletAddressByProfileId = async (profileId: string): Promise<string> => 
+{
+  try 
+  {
+    if (!profileId) 
+    {
+      return "";
+    }
+    const client = new SuiClient({ url: getFullnodeUrl('testnet') });
+    const object = await client.getObject(
+    {
+        id: profileId,
+        options: 
+        {
+          showOwner: true
+        }
+    });
+    console.log(object.data)
+    const owner = object.data?.owner;
+    if (owner && typeof owner === 'object' && 'AddressOwner' in owner) {
+      return owner.AddressOwner as string;
+    }
+    return "";
+  } 
+  catch (error) 
+  {
+    console.error('Error reading user:', error);
+    return "";
+  }
+};
