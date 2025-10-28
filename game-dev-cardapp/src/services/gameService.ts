@@ -63,7 +63,6 @@ export const getGames = async (walletAddress?: string): Promise<Game[]> =>
  */
 export const addGame = async (game: Omit<Game, 'id'>, walletAddress: string): Promise<Game> => {
   const games = await getGames(walletAddress);
-  console.log("fetched new games => " + games)
   const newGame: Game = {
     ...game,
     id: Date.now().toString(),

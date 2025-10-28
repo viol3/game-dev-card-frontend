@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
-import { getProfile, deleteProfile } from '../services/profileService';
-import { getGames, addGame, updateGame  } from '../services/gameService';
-import { getWalletAddressByProfileId } from '../services/profileService';
+import { getProfile } from '../services/profileService';
+import { getGames } from '../services/gameService';
 import { useWallet } from '../contexts/WalletContext';
+import { useWalletActions } from '../hooks/useWalletActions';
 import InventoryPanel from './InventoryPanel';
 import DetailsPanel from './DetailsPanel';
 import SpaceExplorer from './SpaceExplorer';
@@ -20,9 +20,9 @@ const Dashboard = () => {
   const [games, setGames] = useState([]);
   const [selectedGame, setSelectedGame] = useState(null);
   const [isAddingNew, setIsAddingNew] = useState(false);
-  const [copiedAddress, setCopiedAddress] = useState(false);
   const navigate = useNavigate();
-  const { address, disconnect } = useWallet();
+  const { address } = useWallet();
+  const { copiedAddress, truncateAddress, handleCopyAddress, handleDisconnect } = useWalletActions();
   const account = useCurrentAccount();
   const suiClient = useSuiClient();
   const { mutate: signAndExecute } = useSignAndExecuteTransaction();
@@ -47,23 +47,6 @@ const Dashboard = () => {
     }
     checkSavedProfile();
   }, [navigate, address]);
-
-  const handleCopyAddress = () => {
-    if (address) {
-      navigator.clipboard.writeText(address);
-      setCopiedAddress(true);
-      setTimeout(() => setCopiedAddress(false), 2000);
-    }
-  };
-
-  const handleDisconnect = () => {
-    disconnect();
-    navigate('/');
-  };
-
-  const truncateAddress = (addr) => {
-    return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
-  };
 
   const handleAddGame = () => {
     setIsAddingNew(true);
@@ -119,8 +102,6 @@ const Dashboard = () => {
 
   const handleDeleteGame = async (id) => 
   {
-    console.log("Removing => " + id)
-    console.log("Profile id => " + profile.id)
     if (!address) return;
     
     try {
@@ -145,8 +126,6 @@ const Dashboard = () => {
         {
           onSuccess: async (result) => 
           {
-            console.log('Game deleted successfully:', result);
-            
             // Clear selection if the deleted game was selected
             if (selectedGame?.id === id) 
             {
@@ -157,7 +136,6 @@ const Dashboard = () => {
             try {
               const updatedGames = await getGames(address);
               setGames([...updatedGames]); // Create new array reference
-              console.log("Games updated after deletion, count:", updatedGames.length);
             } catch (error) {
               console.error('Error refreshing games:', error);
             }
@@ -340,7 +318,7 @@ const Dashboard = () => {
 
           {/* Explore Space Tab */}
           <TabsContent value="explore" className="mt-0">
-            <div className="bg-slate-800/80 border-4 border-purple-500 pixel-border backdrop-blur-sm" style={{ height: 'calc(100vh - 250px)' }}>
+            <div className="bg-slate-800/80 border-4 border-purple-500 pixel-border backdrop-blur-sm" style={{ height: 'calc(100vh - 200px)' }}>
               <SpaceExplorer />
             </div>
           </TabsContent>

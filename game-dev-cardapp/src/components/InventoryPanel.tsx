@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Button } from './ui/button';
 import { Plus, Trash2, ExternalLink } from 'lucide-react';
 import { ScrollArea } from './ui/scroll-area';
@@ -12,7 +13,7 @@ interface InventoryPanelProps
   onDeleteGame: (id: string) => void;
 }
 
-const InventoryPanel = ({ games, selectedGame, onSelectGame, onAddGame, onDeleteGame }: InventoryPanelProps) => {
+const InventoryPanel = memo(({ games, selectedGame, onSelectGame, onAddGame, onDeleteGame }: InventoryPanelProps) => {
   return (
     <div className="bg-slate-800/80 border-4 border-cyan-500 pixel-border backdrop-blur-sm h-[calc(100vh-200px)]">
       {/* Header */}
@@ -122,6 +123,8 @@ const InventoryPanel = ({ games, selectedGame, onSelectGame, onAddGame, onDelete
       </ScrollArea>
     </div>
   );
-};
+});
+
+InventoryPanel.displayName = 'InventoryPanel';
 
 export default InventoryPanel;

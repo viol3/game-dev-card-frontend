@@ -34,7 +34,6 @@ const PublicPortfolio = () =>
         setLoading(false);
         return
       }
-      console.log("settings games with wallet address => " + walletAddress)
       setGames(await getGames(walletAddress));
       setLoading(false);
       setProfile(true);

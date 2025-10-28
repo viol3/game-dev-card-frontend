@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
@@ -9,7 +9,7 @@ import { useCurrentAccount, useSignAndExecuteTransaction, useSuiClient } from '@
 import { Transaction } from '@mysten/sui/transactions';
 import { toast } from '../hooks/use-toast';
 
-const DetailsPanel = ({ game, isAddingNew, onSave, onCancel }) => {
+const DetailsPanel = memo(({ game, isAddingNew, onSave, onCancel }) => {
   const [formData, setFormData] = useState({
     name: '',
     link: '',
@@ -124,8 +124,6 @@ const DetailsPanel = ({ game, isAddingNew, onSave, onCancel }) => {
         {
           onSuccess: (result) => 
           {
-            console.log('Game updated successfully:', result);
-            
             toast({
               title: 'Game Updated! 🎮',
               description: `${formData.name} has been updated on your portfolio.`,
@@ -218,8 +216,6 @@ const DetailsPanel = ({ game, isAddingNew, onSave, onCancel }) => {
         {
           onSuccess: (result) => 
           {
-            console.log('Game added successfully:', result);
-            
             toast({
               title: 'Game Added! 🎮',
               description: `${formData.name} has been added to your portfolio.`,
@@ -411,6 +407,8 @@ const DetailsPanel = ({ game, isAddingNew, onSave, onCancel }) => {
       </div>
     </div>
   );
-};
+});
+
+DetailsPanel.displayName = 'DetailsPanel';
 
 export default DetailsPanel;

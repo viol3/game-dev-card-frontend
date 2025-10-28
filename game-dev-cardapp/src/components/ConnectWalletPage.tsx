@@ -19,7 +19,6 @@ const ConnectWalletPage = () =>
       
       try 
       {
-        // Profile objesini kontrol et
         const ownedObjects = await suiClient.getOwnedObjects(
         {
           owner: account.address,
@@ -37,18 +36,15 @@ const ConnectWalletPage = () =>
         // If profile exists, redirect to DASHBOARD, otherwise to HOME
         if (ownedObjects.data.length > 0) 
         {
-          console.log('Profile bulundu, DASHBOARD\'a yönlendiriliyor...');
           navigate(ROUTES.DASHBOARD);
         } 
         else 
         {
-          console.log('Profile bulunamadı, HOME\'a yönlendiriliyor...');
           navigate(ROUTES.HOME);
         }
       } 
       catch (error) 
       {
-        console.error('Profile kontrolü başarısız:', error);
         // On error, redirect to HOME
         navigate(ROUTES.HOME);
       } 

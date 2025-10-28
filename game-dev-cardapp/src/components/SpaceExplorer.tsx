@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Rocket, Users, Gamepad2, Star, Search, X, Grid3x3, List, Sparkles, ArrowUpDown, Maximize, Minimize } from 'lucide-react';
-import { getMockUsers } from '../services/userService';
+import { getAllProfiles } from '../services/profileService';
 import type { User } from '../types';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
@@ -67,17 +67,17 @@ const SpaceExplorer = () => {
   
   // Zoom state
   const [zoomLevel, setZoomLevel] = useState(1); // 1 = 100%, 0.5 = 50%, 2 = 200%
-  const [isZooming, setIsZooming] = useState(false);
 
   // Fullscreen state
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   // Generate static stars once (memoized for performance)
   const backgroundElements = useMemo(() => {
-    const stars = Array.from({ length: 150 }, (_, i) => ({
+    // Increase star count for 200% x 200% area (4x the viewport)
+    const stars = Array.from({ length: 600 }, (_, i) => ({
       id: `star-${i}`,
-      left: `${Math.random() * 100}%`,
-      top: `${Math.random() * 100}%`,
+      left: `${Math.random() * 200}%`, // Spread across full 200% width
+      top: `${Math.random() * 200}%`, // Spread across full 200% height
       size: Math.random() * 2 + 1, // 1-3px
       duration: Math.random() * 3 + 2, // 2-5s
       delay: Math.random() * 5, // 0-5s
@@ -86,8 +86,30 @@ const SpaceExplorer = () => {
     return { stars };
   }, []); // Empty dependency - generate once
 
-  // Get all users
-  const allUsers = useMemo(() => getMockUsers(), []);
+  // State for real user data
+  const [allUsers, setAllUsers] = useState<User[]>([]);
+  const [isLoadingUsers, setIsLoadingUsers] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  // Load users from blockchain
+  useEffect(() => {
+    const loadProfiles = async () => {
+      try {
+        setIsLoadingUsers(true);
+        setLoadError(null);
+        const profiles = await getAllProfiles();
+        setAllUsers(profiles);
+      } catch (error) {
+        console.error('Error loading profiles:', error);
+        setLoadError('Failed to load developer profiles');
+        setAllUsers([]);
+      } finally {
+        setIsLoadingUsers(false);
+      }
+    };
+
+    loadProfiles();
+  }, []);
 
   // Extract all unique tags from all users (limited to top 15 most common)
 /*   const allTags = useMemo(() => {
@@ -108,7 +130,7 @@ const SpaceExplorer = () => {
 
   // Filter users based on search criteria
   const filteredUsers = useMemo(() => {
-    return allUsers.filter((user) => {
+    return allUsers.filter((user: User) => {
       // Search by name or bio
       const matchesSearch =
         searchQuery === '' ||
@@ -127,7 +149,7 @@ const SpaceExplorer = () => {
       const matchesTags =
         selectedTags.length === 0 ||
         selectedTags.some((tag) =>
-          user.games?.some((game) => game.tags?.includes(tag))
+          user.games?.some((game: any) => game.tags?.includes(tag))
         );
 
       return matchesSearch && matchesLevel && matchesTags;
@@ -168,7 +190,7 @@ const SpaceExplorer = () => {
     
     // Helper function to check if two planets are too close
     const isPositionValid = (x: number, y: number, size: number, existingPlanets: Planet[]): boolean => {
-      const minDistance = 15; // Minimum percentage distance between planets
+      const minDistance = 12; // Reduced for better space utilization
       
       for (const planet of existingPlanets) {
         const dx = x - planet.x;
@@ -176,7 +198,7 @@ const SpaceExplorer = () => {
         const distance = Math.sqrt(dx * dx + dy * dy);
         
         // Calculate required distance based on both planets' sizes
-        const requiredDistance = minDistance + (size + planet.size) / 10;
+        const requiredDistance = minDistance + (size + planet.size) / 12;
         
         if (distance < requiredDistance) {
           return false;
@@ -185,21 +207,33 @@ const SpaceExplorer = () => {
       return true;
     };
     
-    // Generate position for each user with collision detection
+    // Generate position for each user with improved distribution
     sortedUsers.forEach((user, index) => {
-      // Calculate size based on level and game count
-      const levelSize = Math.min(user.level, 50);
-      const gameSize = Math.min(user.gameCount * 3, 30);
-      const calculatedSize = 40 + levelSize + gameSize;
+      // Calculate size based on level and game count (more balanced)
+      const levelSize = Math.min(user.level * 0.8, 40);
+      const gameSize = Math.min(user.gameCount * 2.5, 25);
+      const calculatedSize = 35 + levelSize + gameSize; // Slightly smaller base size
       
       let x = 0, y = 0;
       let attempts = 0;
-      const maxAttempts = 50; // Prevent infinite loop
+      const maxAttempts = 100; // Increased for better positioning
       
-      // Try to find a valid position
+      // Use grid-based initial positioning for better distribution
+      const gridSize = Math.ceil(Math.sqrt(sortedUsers.length));
+      const gridX = (index % gridSize) * (180 / gridSize) + 10;
+      const gridY = Math.floor(index / gridSize) * (180 / gridSize) + 10;
+      
+      // Try to find a valid position (start near grid position, then randomize)
       do {
-        x = Math.random() * 150 + 10; // 10-160%
-        y = Math.random() * 150 + 10; // 10-160%
+        if (attempts < 10) {
+          // First tries: near grid position with small randomization
+          x = gridX + (Math.random() - 0.5) * 30;
+          y = gridY + (Math.random() - 0.5) * 30;
+        } else {
+          // Later tries: fully random
+          x = Math.random() * 180 + 10; // 10-190%
+          y = Math.random() * 180 + 10; // 10-190%
+        }
         attempts++;
       } while (attempts < maxAttempts && !isPositionValid(x, y, calculatedSize, generatedPlanets));
       
@@ -217,6 +251,34 @@ const SpaceExplorer = () => {
     
     setPlanets(generatedPlanets);
   }, [sortedUsers]);
+
+  // Double-click to zoom in/out handler
+  const handleDoubleClick = useCallback((e: React.MouseEvent) => {
+    const target = e.target as HTMLElement;
+    const isClickingPlanet = target.closest('.planet-element');
+    
+    if (!isClickingPlanet) {
+      const container = galaxyViewRef.current;
+      if (!container) return;
+      
+      const rect = container.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+      
+      setZoomLevel((prevZoom) => {
+        // Toggle between current zoom and 2x zoom
+        const newZoom = prevZoom < 1.5 ? 2 : 1;
+        const zoomFactor = newZoom / prevZoom;
+        
+        setPanOffset((prevOffset) => ({
+          x: mouseX - (mouseX - prevOffset.x) * zoomFactor,
+          y: mouseY - (mouseY - prevOffset.y) * zoomFactor,
+        }));
+        
+        return newZoom;
+      });
+    }
+  }, []);
 
   // Pan/Drag handlers for galaxy view - memoized for performance
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
@@ -249,31 +311,23 @@ const SpaceExplorer = () => {
     setIsPanning(false);
   }, []);
 
-  // Zoom handler for mouse wheel - zoom towards cursor position
-  const handleWheel = useCallback((e: WheelEvent) => {
-    e.preventDefault();
+  // Zoom handler with throttling for better performance
+  const zoomTimeoutRef = useRef<number | null>(null);
+  const pendingZoomRef = useRef<{ mouseX: number; mouseY: number; delta: number } | null>(null);
+
+  const applyZoom = useCallback(() => {
+    if (!pendingZoomRef.current) return;
     
-    const container = galaxyViewRef.current;
-    if (!container) return;
+    const { mouseX, mouseY, delta } = pendingZoomRef.current;
+    pendingZoomRef.current = null;
     
-    const rect = container.getBoundingClientRect();
-    
-    // Get mouse position relative to container
-    const mouseX = e.clientX - rect.left;
-    const mouseY = e.clientY - rect.top;
-    
-    const zoomSpeed = 0.001;
-    const delta = -e.deltaY * zoomSpeed;
-    
-    // Set zooming flag
-    setIsZooming(true);
-    
-    // Batch state updates together
     setZoomLevel((prevZoom) => {
       const newZoom = Math.min(Math.max(prevZoom + delta, 0.5), 3);
+      
+      if (newZoom === prevZoom) return prevZoom;
+      
       const zoomFactor = newZoom / prevZoom;
       
-      // Update pan offset in the same render cycle
       setPanOffset((prevOffset) => ({
         x: mouseX - (mouseX - prevOffset.x) * zoomFactor,
         y: mouseY - (mouseY - prevOffset.y) * zoomFactor,
@@ -281,10 +335,37 @@ const SpaceExplorer = () => {
       
       return newZoom;
     });
-    
-    // Clear zooming flag after a short delay
-    setTimeout(() => setIsZooming(false), 50);
   }, []);
+
+  const handleWheel = useCallback((e: WheelEvent) => {
+    e.preventDefault();
+    
+    const container = galaxyViewRef.current;
+    if (!container) return;
+    
+    const rect = container.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+    
+    // Smoother zoom speed
+    const zoomSpeed = 0.0008;
+    const delta = -e.deltaY * zoomSpeed;
+    
+    // Accumulate zoom changes
+    if (pendingZoomRef.current) {
+      pendingZoomRef.current.delta += delta;
+    } else {
+      pendingZoomRef.current = { mouseX, mouseY, delta };
+    }
+    
+    // Clear existing timeout
+    if (zoomTimeoutRef.current) {
+      cancelAnimationFrame(zoomTimeoutRef.current);
+    }
+    
+    // Apply zoom on next animation frame
+    zoomTimeoutRef.current = requestAnimationFrame(applyZoom);
+  }, [applyZoom]);
 
   // Fullscreen handlers - memoized
   const toggleFullscreen = useCallback(async () => {
@@ -316,22 +397,28 @@ const SpaceExplorer = () => {
   }, []);
 
   // Add wheel event listener with passive: false to allow preventDefault
+  // Add wheel event listener with passive: false to allow preventDefault
   useEffect(() => {
     const galaxyView = galaxyViewRef.current;
-    if (!galaxyView || viewMode !== 'galaxy') return;
+    if (!galaxyView || viewMode !== 'galaxy' || isLoadingUsers || allUsers.length === 0) return;
 
     const wheelHandler = (e: WheelEvent) => {
       handleWheel(e);
     };
 
     galaxyView.addEventListener('wheel', wheelHandler, { passive: false });
+    
     return () => {
       galaxyView.removeEventListener('wheel', wheelHandler);
+      // Cleanup pending zoom on unmount
+      if (zoomTimeoutRef.current) {
+        cancelAnimationFrame(zoomTimeoutRef.current);
+      }
     };
-  }, [handleWheel, viewMode]);
+  }, [handleWheel, viewMode, isLoadingUsers, allUsers.length]);
 
   const handlePlanetClick = useCallback((username: string): void => {
-    navigate(`/portfolio/${username}`);
+    navigate(`/${username}`);
   }, [navigate]);
 
   /* const handleTagToggle = useCallback((tag: string) => {
@@ -569,8 +656,61 @@ const SpaceExplorer = () => {
 
         {/* Right Content Area */}
         <div className="flex-1 overflow-hidden">
+          {/* Loading State */}
+          {isLoadingUsers && (
+            <div className="flex items-center justify-center h-full">
+              <div className="text-center space-y-4">
+                <div className="relative w-20 h-20 mx-auto">
+                  <div className="absolute inset-0 border-4 border-cyan-500/20 rounded-full"></div>
+                  <div className="absolute inset-0 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
+                </div>
+                <p className="text-slate-400 font-mono">Loading developer profiles...</p>
+              </div>
+            </div>
+          )}
+
+          {/* Error State */}
+          {!isLoadingUsers && loadError && (
+            <div className="flex items-center justify-center h-full">
+              <div className="text-center space-y-4 max-w-md px-4">
+                <div className="w-16 h-16 mx-auto bg-red-500/10 rounded-full flex items-center justify-center">
+                  <X className="w-8 h-8 text-red-500" />
+                </div>
+                <h3 className="text-xl font-bold text-white">Failed to Load Profiles</h3>
+                <p className="text-slate-400">{loadError}</p>
+                <Button 
+                  onClick={() => window.location.reload()} 
+                  className="bg-cyan-500 hover:bg-cyan-600 text-white"
+                >
+                  Retry
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Empty State - No Profiles Found */}
+          {!isLoadingUsers && !loadError && allUsers.length === 0 && (
+            <div className="flex items-center justify-center h-full">
+              <div className="text-center space-y-4 max-w-md px-4">
+                <div className="w-20 h-20 mx-auto bg-slate-700/30 rounded-full flex items-center justify-center">
+                  <Users className="w-10 h-10 text-slate-400" />
+                </div>
+                <h3 className="text-xl font-bold text-white">No Developers Yet</h3>
+                <p className="text-slate-400">
+                  Be the first game developer to create a profile on the blockchain!
+                </p>
+                <Button 
+                  onClick={() => navigate('/create-profile')} 
+                  className="bg-cyan-500 hover:bg-cyan-600 text-white"
+                >
+                  Create Your Profile
+                </Button>
+              </div>
+            </div>
+          )}
+
           {/* Content Area - View Mode Dependent */}
-          {viewMode === 'galaxy' && (
+          {!isLoadingUsers && !loadError && allUsers.length > 0 && viewMode === 'galaxy' && (
             /* Galaxy View - Space with planets - Drag to Pan & Zoom */
             <div 
           ref={galaxyViewRef}
@@ -579,12 +719,13 @@ const SpaceExplorer = () => {
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseLeave}
+          onDoubleClick={handleDoubleClick}
         >
           <div 
             className="galaxy-space relative w-[200%] h-[200%] select-none"
             style={{
               transform: `scale(${zoomLevel}) translate(${panOffset.x / zoomLevel}px, ${panOffset.y / zoomLevel}px)`,
-              transition: (isPanning || isZooming) ? 'none' : 'transform 0.1s ease-out',
+              transition: isPanning ? 'none' : 'transform 0.05s ease-out',
               transformOrigin: '0 0',
               willChange: 'transform',
             }}
@@ -732,19 +873,65 @@ const SpaceExplorer = () => {
           </div>
         )}
         
-        {/* Zoom level indicator - Fixed position, top right */}
-        <div className="absolute top-6 right-6 z-50 pointer-events-none">
-          <div className="bg-slate-800/95 border-2 border-cyan-500/50 rounded-lg px-4 py-2 backdrop-blur-sm">
-            <p className="text-xs font-mono text-white">
+        {/* Zoom level indicator and controls - Fixed position, top right */}
+        <div className="absolute top-6 right-6 z-50">
+          <div className="bg-slate-800/95 border-2 border-cyan-500/50 rounded-lg px-4 py-3 backdrop-blur-sm space-y-2">
+            <p className="text-xs font-mono text-white text-center">
               Zoom: <span className="text-cyan-400 font-bold">{Math.round(zoomLevel * 100)}%</span>
             </p>
+            <div className="flex items-center gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-8 w-8 p-0 border-cyan-500/50 hover:bg-cyan-500/20 hover:border-cyan-500 text-cyan-400"
+                onClick={() => {
+                  setZoomLevel((prev) => Math.max(prev - 0.2, 0.5));
+                }}
+                disabled={zoomLevel <= 0.5}
+              >
+                −
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-8 px-2 text-xs border-cyan-500/50 hover:bg-cyan-500/20 hover:border-cyan-500 text-cyan-400"
+                onClick={() => {
+                  setZoomLevel(1);
+                  setPanOffset({ x: 0, y: 0 });
+                }}
+              >
+                Reset
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-8 w-8 p-0 border-cyan-500/50 hover:bg-cyan-500/20 hover:border-cyan-500 text-cyan-400"
+                onClick={() => {
+                  setZoomLevel((prev) => Math.min(prev + 0.2, 3));
+                }}
+                disabled={zoomLevel >= 3}
+              >
+                +
+              </Button>
+            </div>
           </div>
         </div>
+
+        {/* Navigation hint - Fixed position, bottom right */}
+        {!hoveredPlanet && (
+          <div className="absolute bottom-6 right-6 z-50 pointer-events-none">
+            <div className="bg-slate-800/95 border-2 border-cyan-500/50 rounded-lg px-4 py-2 backdrop-blur-sm">
+              <p className="text-xs font-mono text-slate-300">
+                🖱️ Drag to pan • 🔍 Scroll to zoom • 👆 Double-click to zoom • 🌍 Click planet to visit
+              </p>
+            </div>
+          </div>
+        )}
           </div>
           )}
 
           {/* Grid View */}
-          {viewMode === 'grid' && (
+          {!isLoadingUsers && !loadError && allUsers.length > 0 && viewMode === 'grid' && (
             <ScrollArea className="h-full">
               <div className="p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -753,7 +940,7 @@ const SpaceExplorer = () => {
               <Card
                 key={user.id}
                 className="bg-slate-800/50 border-slate-700 hover:border-cyan-500 transition-all cursor-pointer group"
-                onClick={() => navigate(`/portfolio/${user.username}`)}
+                onClick={() => navigate(`/${user.username}`)}
               >
                 {/* @ts-ignore */}
                 <CardHeader className="pb-3">
@@ -782,7 +969,7 @@ const SpaceExplorer = () => {
                   </div>
                   {user.games && user.games.length > 0 && (
                     <div className="flex flex-wrap gap-1 mt-3">
-                      {user.games[0].tags?.slice(0, 3).map((tag) => (
+                      {user.games[0].tags?.slice(0, 3).map((tag: string) => (
                         <Badge key={tag} variant="outline" className="text-xs border-slate-600 text-slate-400">
                           {tag}
                         </Badge>
@@ -798,7 +985,7 @@ const SpaceExplorer = () => {
           )}
 
           {/* List View */}
-          {viewMode === 'list' && (
+          {!isLoadingUsers && !loadError && allUsers.length > 0 && viewMode === 'list' && (
             <ScrollArea className="h-full">
               <div className="p-6">
                 <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg border border-slate-700/50 overflow-hidden">
@@ -817,7 +1004,7 @@ const SpaceExplorer = () => {
                     <tr
                       key={user.id}
                       className="hover:bg-slate-700/30 cursor-pointer transition-colors"
-                      onClick={() => navigate(`/portfolio/${user.username}`)}
+                      onClick={() => navigate(`/${user.username}`)}
                     >
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
@@ -845,7 +1032,7 @@ const SpaceExplorer = () => {
                       <td className="px-4 py-3">
                         {user.games && user.games.length > 0 && (
                           <div className="flex flex-wrap gap-1">
-                            {user.games[0].tags?.slice(0, 3).map((tag) => (
+                            {user.games[0].tags?.slice(0, 3).map((tag: string) => (
                               <Badge key={tag} variant="outline" className="text-xs border-slate-600 text-slate-400">
                                 {tag}
                               </Badge>

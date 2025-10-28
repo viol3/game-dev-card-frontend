@@ -69,13 +69,11 @@ const CreateProfilePage = () =>
   // Handle input change
   const handleNameChange = (e) => {
     let value = e.target.value;
-    
-    // Automatically convert uppercase to lowercase
+  
     value = value.toLowerCase();
     
     setCharacterName(value);
-    
-    // Real-time validasyon
+  
     if (value) {
       const error = validateUsername(value);
       setValidationError(error || '');
@@ -87,8 +85,7 @@ const CreateProfilePage = () =>
   const handleSubmit = async (e) => 
     {
     e.preventDefault();
-    
-    // Final validasyon
+  
     const validationResult = validateUsername(characterName);
     if (validationResult) 
     {
@@ -103,7 +100,6 @@ const CreateProfilePage = () =>
     }
 
     const profileId = await getProfileIdFromUsername(characterName);
-    console.log("Checking profile ID for username => " + characterName + " : " + profileId);
     if(profileId != "")
     {
       toast(
@@ -149,8 +145,6 @@ const CreateProfilePage = () =>
         {
           onSuccess: (result) => 
           {
-            console.log('Profile created successfully:', result);
-            
             toast({
               title: 'Character Created! 🎮',
               description: `Welcome, ${characterName}! Your quest begins now.`,
